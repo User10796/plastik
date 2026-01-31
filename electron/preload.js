@@ -31,3 +31,13 @@ contextBridge.exposeInMainWorld('storage', {
     return { keys: cleanKeys, prefix, shared };
   }
 });
+
+// Expose iCloud API to renderer process
+contextBridge.exposeInMainWorld('icloud', {
+  getStatus: () => ipcRenderer.invoke('icloud:status'),
+  syncNow: () => ipcRenderer.invoke('icloud:sync-now'),
+  importFromICloud: () => ipcRenderer.invoke('icloud:import'),
+  onDataChanged: (callback) => {
+    ipcRenderer.on('icloud-data-changed', (event, data) => callback(data));
+  }
+});

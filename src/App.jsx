@@ -407,7 +407,7 @@ function ApplicationsTab({ applications, setApplications, creditPulls, setCredit
         },
         body: JSON.stringify({
           model: 'claude-sonnet-4-20250514',
-          max_tokens: 4000,
+          max_tokens: 8000,
           messages: [{
             role: 'user',
             content: `Parse this credit report text and extract all HARD INQUIRIES (not soft inquiries). Return JSON:
@@ -432,14 +432,31 @@ Return ONLY valid JSON, no other text. Only include hard inquiries, not soft/pro
       });
 
       const data = await response.json();
-      const content = data.content?.[0]?.text || '';
-      
-      const jsonMatch = content.match(/\{[\s\S]*\}/);
-      if (jsonMatch) {
-        const parsed = JSON.parse(jsonMatch[0]);
+
+      if (data.error) {
+        setParseResult({ error: data.error.message || 'API error', raw: JSON.stringify(data.error, null, 2) });
+        setParsing(false);
+        return;
+      }
+
+      let content = data.content?.[0]?.text || '';
+      content = content.replace(/^```(?:json)?\s*\n?/i, '').replace(/\n?```\s*$/i, '').trim();
+
+      try {
+        const parsed = JSON.parse(content);
         setParseResult(parsed);
-      } else {
-        setParseResult({ error: 'Could not parse response', raw: content });
+      } catch {
+        let braceCount = 0, startIdx = -1, endIdx = -1;
+        for (let i = 0; i < content.length; i++) {
+          if (content[i] === '{') { if (startIdx === -1) startIdx = i; braceCount++; }
+          else if (content[i] === '}') { braceCount--; if (braceCount === 0 && startIdx !== -1) { endIdx = i; break; } }
+        }
+        if (startIdx !== -1 && endIdx !== -1) {
+          const parsed = JSON.parse(content.substring(startIdx, endIdx + 1));
+          setParseResult(parsed);
+        } else {
+          setParseResult({ error: 'Could not parse response', raw: content });
+        }
       }
     } catch (error) {
       setParseResult({ error: error.message });
@@ -610,8 +627,8 @@ Return ONLY valid JSON, no other text. Only include hard inquiries, not soft/pro
                           padding: '2px 8px',
                           borderRadius: '8px',
                           fontSize: '0.7rem',
-                          background: app.holder === 'Sterling' ? '#1e3a5f' : '#3f1f5f',
-                          color: app.holder === 'Sterling' ? '#60a5fa' : '#c084fc'
+                          background: getHolderColor(app.holder).bg,
+                          color: getHolderColor(app.holder).text
                         }}>
                           {app.holder}
                         </span>
@@ -982,8 +999,7 @@ Return ONLY valid JSON, no other text. Only include hard inquiries, not soft/pro
                   <div>
                     <label style={{ display: 'block', color: '#94a3b8', marginBottom: '6px', fontSize: '0.85rem' }}>Holder</label>
                     <select name="holder" className="input-field">
-                      <option value="Sterling">Sterling</option>
-                      <option value="Spouse">Spouse</option>
+                      {holders.map(h => <option key={h} value={h}>{h}</option>)}
                     </select>
                   </div>
                   <div>
@@ -1485,7 +1501,7 @@ function AnnualFeesTab({ cards, setCards, downgradePaths }) {
 }
 
 // Enhanced Companion Pass Component for Dashboard
-function CompanionPassSection({ companionPasses, setCompanionPasses, cards }) {
+function CompanionPassSection({ companionPasses, setCompanionPasses, cards, holders }) {
   const [showEdit, setShowEdit] = useState(null);
 
   // Calculate Southwest earning for Companion Pass
@@ -1697,10 +1713,9 @@ function CompanionPassSection({ companionPasses, setCompanionPasses, cards }) {
                     <select 
                       name="holder" 
                       className="input-field"
-                      defaultValue={showEdit !== 'new' ? companionPasses[showEdit]?.holder : 'Sterling'}
+                      defaultValue={showEdit !== 'new' ? companionPasses[showEdit]?.holder : holders[0]}
                     >
-                      <option value="Sterling">Sterling</option>
-                      <option value="Spouse">Spouse</option>
+                      {holders.map(h => <option key={h} value={h}>{h}</option>)}
                     </select>
                   </div>
                   <div style={{ display: 'flex', alignItems: 'center', gap: '8px', paddingTop: '24px' }}>
@@ -1968,7 +1983,7 @@ const popularCards = [
   }
 ];
 
-function StrategyTab({ cards, pointsBalances, applications, apiKey, setShowApiKeyModal, issuerRules }) {
+function StrategyTab({ cards, pointsBalances, applications, apiKey, setShowSettings, issuerRules }) {
   const [selectedCard, setSelectedCard] = useState(null);
   const [customCard, setCustomCard] = useState({
     name: '',
@@ -2015,7 +2030,7 @@ function StrategyTab({ cards, pointsBalances, applications, apiKey, setShowApiKe
   // Analyze card with Claude API
   const analyzeCard = async (cardToAnalyze) => {
     if (!apiKey) {
-      setShowApiKeyModal(true);
+      setShowSettings(true);
       return;
     }
 
@@ -2089,13 +2104,29 @@ Return ONLY valid JSON.`
       });
 
       const data = await response.json();
-      const content = data.content?.[0]?.text || '';
-      
-      const jsonMatch = content.match(/\{[\s\S]*\}/);
-      if (jsonMatch) {
-        setAnalysisResult(JSON.parse(jsonMatch[0]));
-      } else {
-        setAnalysisResult({ error: 'Could not parse response' });
+
+      if (data.error) {
+        setAnalysisResult({ error: data.error.message || 'API error' });
+        setAnalyzing(false);
+        return;
+      }
+
+      let content = data.content?.[0]?.text || '';
+      content = content.replace(/^```(?:json)?\s*\n?/i, '').replace(/\n?```\s*$/i, '').trim();
+
+      try {
+        setAnalysisResult(JSON.parse(content));
+      } catch {
+        let braceCount = 0, startIdx = -1, endIdx = -1;
+        for (let i = 0; i < content.length; i++) {
+          if (content[i] === '{') { if (startIdx === -1) startIdx = i; braceCount++; }
+          else if (content[i] === '}') { braceCount--; if (braceCount === 0 && startIdx !== -1) { endIdx = i; break; } }
+        }
+        if (startIdx !== -1 && endIdx !== -1) {
+          setAnalysisResult(JSON.parse(content.substring(startIdx, endIdx + 1)));
+        } else {
+          setAnalysisResult({ error: 'Could not parse response' });
+        }
       }
     } catch (error) {
       setAnalysisResult({ error: error.message });
@@ -2741,25 +2772,44 @@ export default function CreditCardTracker() {
   const [applications, setApplications] = useState([]);
   const [creditPulls, setCreditPulls] = useState([]);
   const [apiKey, setApiKey] = useState('');
-  const [showApiKeyModal, setShowApiKeyModal] = useState(false);
   const [statementText, setStatementText] = useState('');
   const [parsing, setParsing] = useState(false);
   const [parseResult, setParseResult] = useState(null);
   const [editingCard, setEditingCard] = useState(null);
   const [showAddCard, setShowAddCard] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
+  const [selectedImportCard, setSelectedImportCard] = useState('');
+  const [holders, setHolders] = useState(['Sterling', 'Spouse']);
+  const [showSettings, setShowSettings] = useState(false);
+  const [newHolderName, setNewHolderName] = useState('');
+  const [icloudStatus, setIcloudStatus] = useState({ available: false, lastSync: null });
+
+  // Color palette for holder badges
+  const holderColors = [
+    { bg: '#1e3a5f', text: '#60a5fa' },
+    { bg: '#3f1f5f', text: '#c084fc' },
+    { bg: '#1f4f3f', text: '#6ee7b7' },
+    { bg: '#5f3f1f', text: '#fbbf24' },
+    { bg: '#4f1f1f', text: '#fca5a5' },
+  ];
+
+  const getHolderColor = (name) => {
+    const idx = holders.indexOf(name);
+    return holderColors[(idx >= 0 ? idx : 0) % holderColors.length];
+  };
 
   // Load data from persistent storage
   useEffect(() => {
     const loadData = async () => {
       try {
-        const [cardsResult, pointsResult, passesResult, apiKeyResult, applicationsResult, creditPullsResult] = await Promise.all([
+        const [cardsResult, pointsResult, passesResult, apiKeyResult, applicationsResult, creditPullsResult, holdersResult] = await Promise.all([
           window.storage.get('cc-tracker-cards').catch(() => null),
           window.storage.get('cc-tracker-points').catch(() => null),
           window.storage.get('cc-tracker-passes').catch(() => null),
           window.storage.get('cc-tracker-apikey').catch(() => null),
           window.storage.get('cc-tracker-applications').catch(() => null),
-          window.storage.get('cc-tracker-creditpulls').catch(() => null)
+          window.storage.get('cc-tracker-creditpulls').catch(() => null),
+          window.storage.get('cc-tracker-holders').catch(() => null)
         ]);
 
         setCards(cardsResult?.value ? JSON.parse(cardsResult.value) : initialCards);
@@ -2768,6 +2818,7 @@ export default function CreditCardTracker() {
         setApplications(applicationsResult?.value ? JSON.parse(applicationsResult.value) : initialApplications);
         setCreditPulls(creditPullsResult?.value ? JSON.parse(creditPullsResult.value) : initialCreditPulls);
         if (apiKeyResult?.value) setApiKey(apiKeyResult.value);
+        if (holdersResult?.value) setHolders(JSON.parse(holdersResult.value));
       } catch (e) {
         console.error('Error loading data:', e);
         setCards(initialCards);
@@ -2777,8 +2828,29 @@ export default function CreditCardTracker() {
         setCreditPulls(initialCreditPulls);
       }
       setIsLoading(false);
+
+      // Check iCloud status
+      if (window.icloud) {
+        const status = await window.icloud.getStatus();
+        setIcloudStatus(status);
+      }
     };
     loadData();
+  }, []);
+
+  // Listen for iCloud changes from other devices
+  useEffect(() => {
+    if (window.icloud) {
+      window.icloud.onDataChanged((data) => {
+        if (data.cards) setCards(data.cards);
+        if (data.pointsBalances) setPointsBalances(data.pointsBalances);
+        if (data.companionPasses) setCompanionPasses(data.companionPasses);
+        if (data.applications) setApplications(data.applications);
+        if (data.creditPulls) setCreditPulls(data.creditPulls);
+        if (data.holders) setHolders(data.holders);
+        setIcloudStatus(prev => ({ ...prev, lastSync: new Date().toISOString() }));
+      });
+    }
   }, []);
 
   // Save data whenever it changes
@@ -2812,10 +2884,16 @@ export default function CreditCardTracker() {
     }
   }, [creditPulls, isLoading]);
 
+  useEffect(() => {
+    if (!isLoading && holders.length > 0) {
+      window.storage.set('cc-tracker-holders', JSON.stringify(holders)).catch(console.error);
+    }
+  }, [holders, isLoading]);
+
   const saveApiKey = async (key) => {
     setApiKey(key);
     await window.storage.set('cc-tracker-apikey', key).catch(console.error);
-    setShowApiKeyModal(false);
+    setShowSettings(false);
   };
 
   const parseStatement = async () => {
@@ -2834,7 +2912,7 @@ export default function CreditCardTracker() {
         },
         body: JSON.stringify({
           model: 'claude-sonnet-4-20250514',
-          max_tokens: 4000,
+          max_tokens: 8000,
           messages: [{
             role: 'user',
             content: `Parse this credit card statement and extract the following information in JSON format:
@@ -2876,15 +2954,36 @@ Return ONLY valid JSON, no other text.`
       });
 
       const data = await response.json();
-      const content = data.content?.[0]?.text || '';
-      
+
+      // Check for API error responses
+      if (data.error) {
+        setParseResult({ error: data.error.message || 'API error', raw: JSON.stringify(data.error, null, 2) });
+        setParsing(false);
+        return;
+      }
+
+      let content = data.content?.[0]?.text || '';
+
+      // Strip markdown code fences if present
+      content = content.replace(/^```(?:json)?\s*\n?/i, '').replace(/\n?```\s*$/i, '').trim();
+
       // Try to parse the JSON response
-      const jsonMatch = content.match(/\{[\s\S]*\}/);
-      if (jsonMatch) {
-        const parsed = JSON.parse(jsonMatch[0]);
+      try {
+        const parsed = JSON.parse(content);
         setParseResult(parsed);
-      } else {
-        setParseResult({ error: 'Could not parse response', raw: content });
+      } catch {
+        // Fallback: find outermost balanced braces
+        let braceCount = 0, startIdx = -1, endIdx = -1;
+        for (let i = 0; i < content.length; i++) {
+          if (content[i] === '{') { if (startIdx === -1) startIdx = i; braceCount++; }
+          else if (content[i] === '}') { braceCount--; if (braceCount === 0 && startIdx !== -1) { endIdx = i; break; } }
+        }
+        if (startIdx !== -1 && endIdx !== -1) {
+          const parsed = JSON.parse(content.substring(startIdx, endIdx + 1));
+          setParseResult(parsed);
+        } else {
+          setParseResult({ error: 'Could not parse response', raw: content });
+        }
       }
     } catch (error) {
       setParseResult({ error: error.message });
@@ -2895,11 +2994,13 @@ Return ONLY valid JSON, no other text.`
   const applyParseResult = () => {
     if (!parseResult || parseResult.error) return;
 
-    // Find matching card
-    const matchingCard = cards.find(c => 
-      c.name.toLowerCase().includes(parseResult.cardIdentifier?.toLowerCase() || '') ||
-      c.issuer.toLowerCase() === parseResult.issuer?.toLowerCase()
-    );
+    // Use selected card from dropdown, or try to auto-match
+    const matchingCard = selectedImportCard
+      ? cards.find(c => c.id === parseInt(selectedImportCard))
+      : cards.find(c =>
+          c.name.toLowerCase().includes(parseResult.cardIdentifier?.toLowerCase() || '') ||
+          c.issuer.toLowerCase() === parseResult.issuer?.toLowerCase()
+        );
 
     if (matchingCard) {
       setCards(cards.map(c => {
@@ -3139,19 +3240,50 @@ Return ONLY valid JSON, no other text.`
               <p style={{ margin: '2px 0 0', color: '#64748b', fontSize: '0.85rem' }}>Credit Card Benefits Tracker</p>
             </div>
           </div>
-          <button 
-            onClick={() => setShowApiKeyModal(true)}
+          <button
+            onClick={() => setShowSettings(true)}
             className="btn-secondary"
-            style={{ display: 'flex', alignItems: 'center', gap: '8px' }}
+            style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '1.1rem' }}
+            title="Settings"
           >
-            <span style={{ 
-              width: '8px', 
-              height: '8px', 
-              borderRadius: '50%', 
-              background: apiKey ? '#22c55e' : '#ef4444' 
+            <span style={{
+              width: '8px',
+              height: '8px',
+              borderRadius: '50%',
+              background: apiKey ? '#22c55e' : '#ef4444'
             }}></span>
-            API {apiKey ? 'Connected' : 'Not Set'}
+            ⚙ Settings
           </button>
+          <div
+            style={{
+              display: 'flex',
+              alignItems: 'center',
+              gap: '6px',
+              color: icloudStatus.available ? '#22c55e' : '#64748b',
+              fontSize: '0.8rem',
+              cursor: 'pointer',
+              padding: '4px 8px',
+              borderRadius: '8px',
+              background: 'rgba(30, 41, 59, 0.5)'
+            }}
+            title={icloudStatus.available
+              ? `iCloud synced${icloudStatus.lastSync ? ' • ' + new Date(icloudStatus.lastSync).toLocaleTimeString() : ''}`
+              : 'iCloud not available'}
+            onClick={() => {
+              if (window.icloud) {
+                window.icloud.syncNow().then(r => {
+                  if (r.success) {
+                    window.icloud.getStatus().then(setIcloudStatus);
+                  }
+                });
+              }
+            }}
+          >
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <path d="M18 10h-1.26A8 8 0 1 0 9 20h9a5 5 0 0 0 0-10z"/>
+            </svg>
+            {icloudStatus.available ? 'Synced' : 'Local'}
+          </div>
         </div>
       </header>
 
@@ -3192,7 +3324,7 @@ Return ONLY valid JSON, no other text.`
                 <div style={{ color: '#94a3b8', fontSize: '0.9rem', marginBottom: '8px' }}>Total Cards</div>
                 <div style={{ fontSize: '2.5rem', fontWeight: 700, color: '#f59e0b' }}>{cards.length}</div>
                 <div style={{ color: '#64748b', fontSize: '0.85rem', marginTop: '8px' }}>
-                  {cards.filter(c => c.holder === 'Sterling').length} Sterling / {cards.filter(c => c.holder === 'Spouse').length} Spouse
+                  {holders.map((h, i) => `${cards.filter(c => c.holder === h).length} ${h}`).join(' / ')}
                 </div>
               </div>
 
@@ -3251,10 +3383,11 @@ Return ONLY valid JSON, no other text.`
             </div>
 
             {/* Companion Passes - Enhanced */}
-            <CompanionPassSection 
+            <CompanionPassSection
               companionPasses={companionPasses}
               setCompanionPasses={setCompanionPasses}
               cards={cards}
+              holders={holders}
             />
 
             {/* Upcoming Actions */}
@@ -3333,8 +3466,8 @@ Return ONLY valid JSON, no other text.`
                           borderRadius: '12px',
                           fontSize: '0.75rem',
                           fontWeight: 500,
-                          background: card.holder === 'Sterling' ? '#1e3a5f' : '#3f1f5f',
-                          color: card.holder === 'Sterling' ? '#60a5fa' : '#c084fc'
+                          background: getHolderColor(card.holder).bg,
+                          color: getHolderColor(card.holder).text
                         }}>
                           {card.holder}
                         </span>
@@ -3556,13 +3689,30 @@ Return ONLY valid JSON, no other text.`
                 <div style={{ color: '#fed7aa', marginBottom: '12px' }}>
                   To use the statement parsing feature, you need to add your Anthropic API key.
                 </div>
-                <button className="btn-primary" onClick={() => setShowApiKeyModal(true)}>
+                <button className="btn-primary" onClick={() => setShowSettings(true)}>
                   Add API Key
                 </button>
               </div>
             )}
 
             <div style={{ display: 'grid', gap: '20px' }}>
+              <div>
+                <label style={{ display: 'block', color: '#94a3b8', marginBottom: '8px', fontSize: '0.9rem' }}>
+                  Assign to Card
+                </label>
+                <select
+                  className="input-field"
+                  value={selectedImportCard}
+                  onChange={(e) => setSelectedImportCard(e.target.value)}
+                  style={{ maxWidth: '400px' }}
+                >
+                  <option value="">Auto-detect from statement</option>
+                  {cards.map(c => (
+                    <option key={c.id} value={c.id}>{c.issuer} {c.name}</option>
+                  ))}
+                </select>
+              </div>
+
               <div>
                 <label style={{ display: 'block', color: '#94a3b8', marginBottom: '8px', fontSize: '0.9rem' }}>
                   Statement Text (copy from PDF or online portal)
@@ -3802,42 +3952,108 @@ Return ONLY valid JSON, no other text.`
             pointsBalances={pointsBalances}
             applications={applications}
             apiKey={apiKey}
-            setShowApiKeyModal={setShowApiKeyModal}
+            setShowSettings={setShowSettings}
             issuerRules={issuerRules}
           />
         )}
       </main>
 
-      {/* API Key Modal */}
-      {showApiKeyModal && (
-        <div className="modal-overlay" onClick={() => setShowApiKeyModal(false)}>
-          <div className="modal-content" onClick={e => e.stopPropagation()}>
-            <h3 style={{ margin: '0 0 16px', color: '#f1f5f9' }}>Anthropic API Key</h3>
-            <p style={{ color: '#94a3b8', marginBottom: '20px', fontSize: '0.9rem' }}>
-              Your API key is stored locally and used only to parse statements.
-            </p>
-            <input
-              type="password"
-              className="input-field"
-              placeholder="sk-ant-..."
-              defaultValue={apiKey}
-              onKeyDown={(e) => {
-                if (e.key === 'Enter') saveApiKey(e.target.value);
-              }}
-              autoFocus
-            />
-            <div style={{ display: 'flex', gap: '12px', marginTop: '20px' }}>
-              <button 
-                className="btn-primary"
-                onClick={(e) => {
-                  const input = e.target.parentElement.previousElementSibling;
-                  saveApiKey(input.value);
+      {/* Settings Modal */}
+      {showSettings && (
+        <div className="modal-overlay" onClick={() => setShowSettings(false)}>
+          <div className="modal-content" onClick={e => e.stopPropagation()} style={{ maxWidth: '500px' }}>
+            <h3 style={{ margin: '0 0 24px', color: '#f1f5f9', fontSize: '1.25rem' }}>Settings</h3>
+
+            {/* Account Holders Section */}
+            <div style={{ marginBottom: '24px' }}>
+              <h4 style={{ color: '#94a3b8', fontSize: '0.85rem', textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: '12px' }}>Account Holders</h4>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', marginBottom: '12px' }}>
+                {holders.map((holder, idx) => (
+                  <div key={idx} style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                    <span style={{
+                      width: '8px', height: '8px', borderRadius: '50%',
+                      background: holderColors[idx % holderColors.length].text,
+                      flexShrink: 0
+                    }}></span>
+                    <span style={{ color: '#f1f5f9', flex: 1 }}>{holder}</span>
+                    {holders.length > 1 && (
+                      <button
+                        onClick={() => setHolders(holders.filter((_, i) => i !== idx))}
+                        style={{
+                          background: 'none', border: 'none', color: '#ef4444', cursor: 'pointer',
+                          fontSize: '1.1rem', padding: '2px 6px', borderRadius: '4px'
+                        }}
+                        onMouseOver={e => e.target.style.background = '#7f1d1d'}
+                        onMouseOut={e => e.target.style.background = 'none'}
+                      >
+                        ×
+                      </button>
+                    )}
+                  </div>
+                ))}
+              </div>
+              <div style={{ display: 'flex', gap: '8px' }}>
+                <input
+                  type="text"
+                  className="input-field"
+                  placeholder="New holder name..."
+                  value={newHolderName}
+                  onChange={(e) => setNewHolderName(e.target.value)}
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter' && newHolderName.trim()) {
+                      setHolders([...holders, newHolderName.trim()]);
+                      setNewHolderName('');
+                    }
+                  }}
+                  style={{ flex: 1 }}
+                />
+                <button
+                  className="btn-primary"
+                  style={{ padding: '8px 16px' }}
+                  onClick={() => {
+                    if (newHolderName.trim()) {
+                      setHolders([...holders, newHolderName.trim()]);
+                      setNewHolderName('');
+                    }
+                  }}
+                >
+                  Add
+                </button>
+              </div>
+            </div>
+
+            {/* API Key Section */}
+            <div style={{ borderTop: '1px solid #334155', paddingTop: '20px' }}>
+              <h4 style={{ color: '#94a3b8', fontSize: '0.85rem', textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: '12px' }}>Anthropic API Key</h4>
+              <p style={{ color: '#64748b', marginBottom: '12px', fontSize: '0.85rem' }}>
+                Stored locally. Used only for statement parsing and strategy analysis.
+              </p>
+              <input
+                id="settings-api-key"
+                type="password"
+                className="input-field"
+                placeholder="sk-ant-..."
+                defaultValue={apiKey}
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter') saveApiKey(e.target.value);
+                }}
+              />
+              <button
+                className="btn-secondary"
+                style={{ marginTop: '8px', padding: '6px 16px', fontSize: '0.85rem' }}
+                onClick={() => {
+                  const input = document.getElementById('settings-api-key');
+                  if (input) saveApiKey(input.value);
                 }}
               >
-                Save
+                {apiKey ? 'Update Key' : 'Save Key'}
               </button>
-              <button className="btn-secondary" onClick={() => setShowApiKeyModal(false)}>
-                Cancel
+            </div>
+
+            {/* Close Button */}
+            <div style={{ display: 'flex', justifyContent: 'flex-end', marginTop: '24px', borderTop: '1px solid #334155', paddingTop: '16px' }}>
+              <button className="btn-primary" onClick={() => setShowSettings(false)}>
+                Done
               </button>
             </div>
           </div>
@@ -3849,8 +4065,29 @@ Return ONLY valid JSON, no other text.`
         <div className="modal-overlay" onClick={() => setEditingCard(null)}>
           <div className="modal-content" onClick={e => e.stopPropagation()} style={{ maxWidth: '600px' }}>
             <h3 style={{ margin: '0 0 20px', color: '#f1f5f9' }}>Edit {editingCard.issuer} {editingCard.name}</h3>
-            
+
             <div style={{ display: 'grid', gap: '16px' }}>
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
+                <div>
+                  <label style={{ display: 'block', color: '#94a3b8', marginBottom: '6px', fontSize: '0.85rem' }}>Card Name</label>
+                  <input
+                    type="text"
+                    className="input-field"
+                    defaultValue={editingCard.name}
+                    onChange={(e) => setEditingCard({ ...editingCard, name: e.target.value })}
+                  />
+                </div>
+                <div>
+                  <label style={{ display: 'block', color: '#94a3b8', marginBottom: '6px', fontSize: '0.85rem' }}>Issuer</label>
+                  <input
+                    type="text"
+                    className="input-field"
+                    defaultValue={editingCard.issuer}
+                    onChange={(e) => setEditingCard({ ...editingCard, issuer: e.target.value })}
+                  />
+                </div>
+              </div>
+
               <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
                 <div>
                   <label style={{ display: 'block', color: '#94a3b8', marginBottom: '6px', fontSize: '0.85rem' }}>Balance</label>
@@ -3884,14 +4121,25 @@ Return ONLY valid JSON, no other text.`
                   />
                 </div>
                 <div>
+                  <label style={{ display: 'block', color: '#94a3b8', marginBottom: '6px', fontSize: '0.85rem' }}>Credit Limit</label>
+                  <input
+                    type="number"
+                    className="input-field"
+                    defaultValue={editingCard.creditLimit || 0}
+                    onChange={(e) => setEditingCard({ ...editingCard, creditLimit: parseFloat(e.target.value) || 0 })}
+                  />
+                </div>
+              </div>
+
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
+                <div>
                   <label style={{ display: 'block', color: '#94a3b8', marginBottom: '6px', fontSize: '0.85rem' }}>Holder</label>
                   <select
                     className="input-field"
                     defaultValue={editingCard.holder}
                     onChange={(e) => setEditingCard({ ...editingCard, holder: e.target.value })}
                   >
-                    <option value="Sterling">Sterling</option>
-                    <option value="Spouse">Spouse</option>
+                    {holders.map(h => <option key={h} value={h}>{h}</option>)}
                   </select>
                 </div>
               </div>
@@ -3940,6 +4188,7 @@ Return ONLY valid JSON, no other text.`
                 holder: form.holder.value,
                 annualFee: parseFloat(form.annualFee.value) || 0,
                 apr: parseFloat(form.apr.value) || 0,
+                creditLimit: parseFloat(form.creditLimit.value) || 0,
                 currentBalance: 0,
                 openDate: form.openDate.value,
                 anniversaryDate: form.openDate.value,
@@ -3968,14 +4217,20 @@ Return ONLY valid JSON, no other text.`
                   </div>
                 </div>
 
-                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '12px' }}>
+                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
                   <div>
                     <label style={{ display: 'block', color: '#94a3b8', marginBottom: '6px', fontSize: '0.85rem' }}>Holder</label>
                     <select name="holder" className="input-field">
-                      <option value="Sterling">Sterling</option>
-                      <option value="Spouse">Spouse</option>
+                      {holders.map(h => <option key={h} value={h}>{h}</option>)}
                     </select>
                   </div>
+                  <div>
+                    <label style={{ display: 'block', color: '#94a3b8', marginBottom: '6px', fontSize: '0.85rem' }}>Credit Limit</label>
+                    <input name="creditLimit" type="number" className="input-field" placeholder="10000" />
+                  </div>
+                </div>
+
+                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
                   <div>
                     <label style={{ display: 'block', color: '#94a3b8', marginBottom: '6px', fontSize: '0.85rem' }}>Annual Fee</label>
                     <input name="annualFee" type="number" className="input-field" placeholder="95" />

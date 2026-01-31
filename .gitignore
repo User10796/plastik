@@ -30,3 +30,9 @@ coverage/
 
 # Electron builder
 /release/
+
+# iOS build artifacts
+cardflow-ios/build/
+cardflow-ios/CardFlow.xcodeproj/xcuserdata/
+cardflow-ios/CardFlow.xcodeproj/project.xcworkspace/xcuserdata/
+*.xcuserstate
