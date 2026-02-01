@@ -7,12 +7,11 @@ const os = require('os');
 const userDataPath = app.getPath('userData');
 const storageFile = path.join(userDataPath, 'cardflow-data.json');
 
-// iCloud Drive path — use the iOS app's iCloud container so both platforms share data.
-// On macOS, this folder is at ~/Library/Mobile Documents/iCloud~com~plastikapp~ios/Documents/
-// On iOS, the app accesses the same container via FileManager ubiquity APIs.
+// iCloud Drive path — use the general iCloud Drive (com~apple~CloudDocs) which is
+// accessible from both macOS (direct file path) and iOS (via nil ubiquity container).
 const iCloudContainerDir = path.join(
   os.homedir(),
-  'Library/Mobile Documents/iCloud~com~plastikapp~ios/Documents'
+  'Library/Mobile Documents/com~apple~CloudDocs/Plastik'
 );
 const iCloudFile = path.join(iCloudContainerDir, 'cardflow-data.json');
 let iCloudAvailable = false;
