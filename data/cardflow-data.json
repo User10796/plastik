@@ -1,0 +1,493 @@
+{
+  "version": "1.0.0",
+  "lastUpdated": "2026-01-31T12:00:00Z",
+  "cards": [
+    {
+      "id": "chase-sapphire-preferred",
+      "name": "Chase Sapphire Preferred",
+      "issuer": "chase",
+      "network": "visa",
+      "annualFee": 95,
+      "signupBonus": {
+        "points": 60000,
+        "currency": "Ultimate Rewards",
+        "spendRequired": 4000,
+        "timeframeDays": 90,
+        "expirationDate": null
+      },
+      "earningRates": [
+        {"id": "csp-dining", "category": "dining", "multiplier": 3.0, "cap": null, "capPeriod": null},
+        {"id": "csp-travel", "category": "travel", "multiplier": 2.0, "cap": null, "capPeriod": null},
+        {"id": "csp-online", "category": "online", "multiplier": 1.0, "cap": null, "capPeriod": null},
+        {"id": "csp-streaming", "category": "streaming", "multiplier": 3.0, "cap": null, "capPeriod": null},
+        {"id": "csp-other", "category": "other", "multiplier": 1.0, "cap": null, "capPeriod": null}
+      ],
+      "benefits": [
+        {"id": "csp-travel-credit", "name": "$50 Hotel Credit", "value": 50, "resetPeriod": "annual", "category": "travel"},
+        {"id": "csp-doordash", "name": "DoorDash DashPass", "value": 0, "resetPeriod": "none", "category": "dining"}
+      ],
+      "transferPartners": ["united", "hyatt", "southwest", "marriott"],
+      "churnRules": {
+        "issuerRules": ["chase-5-24", "chase-one-sapphire"],
+        "cardSpecificRules": []
+      },
+      "referralLink": null,
+      "imageURL": null,
+      "lastUpdated": "2026-01-31T12:00:00Z"
+    },
+    {
+      "id": "chase-sapphire-reserve",
+      "name": "Chase Sapphire Reserve",
+      "issuer": "chase",
+      "network": "visa",
+      "annualFee": 550,
+      "signupBonus": {
+        "points": 60000,
+        "currency": "Ultimate Rewards",
+        "spendRequired": 4000,
+        "timeframeDays": 90,
+        "expirationDate": null
+      },
+      "earningRates": [
+        {"id": "csr-dining", "category": "dining", "multiplier": 3.0, "cap": null, "capPeriod": null},
+        {"id": "csr-travel", "category": "travel", "multiplier": 3.0, "cap": null, "capPeriod": null},
+        {"id": "csr-other", "category": "other", "multiplier": 1.0, "cap": null, "capPeriod": null}
+      ],
+      "benefits": [
+        {"id": "csr-travel-credit", "name": "$300 Travel Credit", "value": 300, "resetPeriod": "annual", "category": "travel"},
+        {"id": "csr-precheck", "name": "Global Entry/TSA PreCheck", "value": 100, "resetPeriod": "none", "category": "travel"},
+        {"id": "csr-priority-pass", "name": "Priority Pass Lounge Access", "value": 0, "resetPeriod": "none", "category": "travel"}
+      ],
+      "transferPartners": ["united", "hyatt", "southwest", "marriott", "british-airways", "air-france"],
+      "churnRules": {
+        "issuerRules": ["chase-5-24", "chase-one-sapphire"],
+        "cardSpecificRules": []
+      },
+      "referralLink": null,
+      "imageURL": null,
+      "lastUpdated": "2026-01-31T12:00:00Z"
+    },
+    {
+      "id": "amex-gold",
+      "name": "American Express Gold Card",
+      "issuer": "amex",
+      "network": "amex",
+      "annualFee": 250,
+      "signupBonus": {
+        "points": 60000,
+        "currency": "Membership Rewards",
+        "spendRequired": 6000,
+        "timeframeDays": 180,
+        "expirationDate": null
+      },
+      "earningRates": [
+        {"id": "amex-gold-dining", "category": "dining", "multiplier": 4.0, "cap": null, "capPeriod": null},
+        {"id": "amex-gold-groceries", "category": "groceries", "multiplier": 4.0, "cap": 25000, "capPeriod": "calendarYear"},
+        {"id": "amex-gold-travel", "category": "travel", "multiplier": 3.0, "cap": null, "capPeriod": null},
+        {"id": "amex-gold-other", "category": "other", "multiplier": 1.0, "cap": null, "capPeriod": null}
+      ],
+      "benefits": [
+        {"id": "amex-gold-dining-credit", "name": "$120 Dining Credit", "value": 120, "resetPeriod": "annual", "category": "dining"},
+        {"id": "amex-gold-uber", "name": "$120 Uber Cash", "value": 120, "resetPeriod": "annual", "category": "travel"},
+        {"id": "amex-gold-dunkin", "name": "$84 Dunkin' Credit", "value": 84, "resetPeriod": "annual", "category": "dining"}
+      ],
+      "transferPartners": ["delta", "hilton", "british-airways", "air-france", "ana"],
+      "churnRules": {
+        "issuerRules": ["amex-once-per-lifetime"],
+        "cardSpecificRules": []
+      },
+      "referralLink": null,
+      "imageURL": null,
+      "lastUpdated": "2026-01-31T12:00:00Z"
+    },
+    {
+      "id": "amex-platinum",
+      "name": "American Express Platinum Card",
+      "issuer": "amex",
+      "network": "amex",
+      "annualFee": 695,
+      "signupBonus": {
+        "points": 80000,
+        "currency": "Membership Rewards",
+        "spendRequired": 8000,
+        "timeframeDays": 180,
+        "expirationDate": null
+      },
+      "earningRates": [
+        {"id": "amex-plat-travel", "category": "travel", "multiplier": 5.0, "cap": null, "capPeriod": null},
+        {"id": "amex-plat-other", "category": "other", "multiplier": 1.0, "cap": null, "capPeriod": null}
+      ],
+      "benefits": [
+        {"id": "amex-plat-airline", "name": "$200 Airline Fee Credit", "value": 200, "resetPeriod": "calendarYear", "category": "travel"},
+        {"id": "amex-plat-hotel", "name": "$200 Hotel Credit", "value": 200, "resetPeriod": "annual", "category": "travel"},
+        {"id": "amex-plat-uber", "name": "$200 Uber Cash", "value": 200, "resetPeriod": "annual", "category": "travel"},
+        {"id": "amex-plat-saks", "name": "$100 Saks Credit", "value": 100, "resetPeriod": "annual", "category": "other"},
+        {"id": "amex-plat-clear", "name": "CLEAR Plus Membership", "value": 189, "resetPeriod": "annual", "category": "travel"},
+        {"id": "amex-plat-centurion", "name": "Centurion Lounge Access", "value": 0, "resetPeriod": "none", "category": "travel"}
+      ],
+      "transferPartners": ["delta", "hilton", "british-airways", "air-france", "ana", "singapore"],
+      "churnRules": {
+        "issuerRules": ["amex-once-per-lifetime"],
+        "cardSpecificRules": []
+      },
+      "referralLink": null,
+      "imageURL": null,
+      "lastUpdated": "2026-01-31T12:00:00Z"
+    },
+    {
+      "id": "citi-premier",
+      "name": "Citi Premier Card",
+      "issuer": "citi",
+      "network": "mastercard",
+      "annualFee": 95,
+      "signupBonus": {
+        "points": 60000,
+        "currency": "ThankYou Points",
+        "spendRequired": 4000,
+        "timeframeDays": 90,
+        "expirationDate": null
+      },
+      "earningRates": [
+        {"id": "citi-premier-dining", "category": "dining", "multiplier": 3.0, "cap": null, "capPeriod": null},
+        {"id": "citi-premier-groceries", "category": "groceries", "multiplier": 3.0, "cap": null, "capPeriod": null},
+        {"id": "citi-premier-travel", "category": "travel", "multiplier": 3.0, "cap": null, "capPeriod": null},
+        {"id": "citi-premier-gas", "category": "gas", "multiplier": 3.0, "cap": null, "capPeriod": null},
+        {"id": "citi-premier-entertainment", "category": "entertainment", "multiplier": 3.0, "cap": null, "capPeriod": null},
+        {"id": "citi-premier-other", "category": "other", "multiplier": 1.0, "cap": null, "capPeriod": null}
+      ],
+      "benefits": [
+        {"id": "citi-premier-hotel", "name": "$100 Hotel Savings", "value": 100, "resetPeriod": "annual", "category": "travel"}
+      ],
+      "transferPartners": ["turkish-airlines", "singapore", "virgin-atlantic", "avianca"],
+      "churnRules": {
+        "issuerRules": ["citi-24-month", "citi-1-8-2-65"],
+        "cardSpecificRules": []
+      },
+      "referralLink": null,
+      "imageURL": null,
+      "lastUpdated": "2026-01-31T12:00:00Z"
+    },
+    {
+      "id": "capital-one-venture-x",
+      "name": "Capital One Venture X",
+      "issuer": "capitalOne",
+      "network": "visa",
+      "annualFee": 395,
+      "signupBonus": {
+        "points": 75000,
+        "currency": "Capital One Miles",
+        "spendRequired": 4000,
+        "timeframeDays": 90,
+        "expirationDate": null
+      },
+      "earningRates": [
+        {"id": "venturex-travel", "category": "travel", "multiplier": 10.0, "cap": null, "capPeriod": null},
+        {"id": "venturex-other", "category": "other", "multiplier": 2.0, "cap": null, "capPeriod": null}
+      ],
+      "benefits": [
+        {"id": "venturex-travel-credit", "name": "$300 Travel Credit", "value": 300, "resetPeriod": "annual", "category": "travel"},
+        {"id": "venturex-anniversary", "name": "10K Anniversary Miles", "value": 100, "resetPeriod": "annual", "category": "other"},
+        {"id": "venturex-lounge", "name": "Capital One Lounge Access", "value": 0, "resetPeriod": "none", "category": "travel"},
+        {"id": "venturex-precheck", "name": "Global Entry/TSA PreCheck", "value": 100, "resetPeriod": "none", "category": "travel"}
+      ],
+      "transferPartners": ["turkish-airlines", "air-canada", "british-airways", "avianca", "wyndham"],
+      "churnRules": {
+        "issuerRules": [],
+        "cardSpecificRules": []
+      },
+      "referralLink": null,
+      "imageURL": null,
+      "lastUpdated": "2026-01-31T12:00:00Z"
+    },
+    {
+      "id": "chase-freedom-unlimited",
+      "name": "Chase Freedom Unlimited",
+      "issuer": "chase",
+      "network": "visa",
+      "annualFee": 0,
+      "signupBonus": {
+        "points": 20000,
+        "currency": "Ultimate Rewards",
+        "spendRequired": 500,
+        "timeframeDays": 90,
+        "expirationDate": null
+      },
+      "earningRates": [
+        {"id": "cfu-dining", "category": "dining", "multiplier": 3.0, "cap": null, "capPeriod": null},
+        {"id": "cfu-drugstores", "category": "drugstores", "multiplier": 3.0, "cap": null, "capPeriod": null},
+        {"id": "cfu-travel", "category": "travel", "multiplier": 5.0, "cap": null, "capPeriod": null},
+        {"id": "cfu-other", "category": "other", "multiplier": 1.5, "cap": null, "capPeriod": null}
+      ],
+      "benefits": [],
+      "transferPartners": [],
+      "churnRules": {
+        "issuerRules": ["chase-5-24"],
+        "cardSpecificRules": []
+      },
+      "referralLink": null,
+      "imageURL": null,
+      "lastUpdated": "2026-01-31T12:00:00Z"
+    },
+    {
+      "id": "chase-freedom-flex",
+      "name": "Chase Freedom Flex",
+      "issuer": "chase",
+      "network": "mastercard",
+      "annualFee": 0,
+      "signupBonus": {
+        "points": 20000,
+        "currency": "Ultimate Rewards",
+        "spendRequired": 500,
+        "timeframeDays": 90,
+        "expirationDate": null
+      },
+      "earningRates": [
+        {"id": "cff-rotating", "category": "other", "multiplier": 5.0, "cap": 1500, "capPeriod": "quarterly"},
+        {"id": "cff-dining", "category": "dining", "multiplier": 3.0, "cap": null, "capPeriod": null},
+        {"id": "cff-drugstores", "category": "drugstores", "multiplier": 3.0, "cap": null, "capPeriod": null},
+        {"id": "cff-travel", "category": "travel", "multiplier": 5.0, "cap": null, "capPeriod": null},
+        {"id": "cff-other", "category": "other", "multiplier": 1.0, "cap": null, "capPeriod": null}
+      ],
+      "benefits": [],
+      "transferPartners": [],
+      "churnRules": {
+        "issuerRules": ["chase-5-24"],
+        "cardSpecificRules": []
+      },
+      "referralLink": null,
+      "imageURL": null,
+      "lastUpdated": "2026-01-31T12:00:00Z"
+    }
+  ],
+  "offers": [
+    {
+      "id": "csp-offer-2026",
+      "cardId": "chase-sapphire-preferred",
+      "title": "60K Bonus Points",
+      "description": "Earn 60,000 bonus Ultimate Rewards points after spending $4,000 in the first 3 months.",
+      "bonusPoints": 60000,
+      "bonusCurrency": "Ultimate Rewards",
+      "spendRequired": 4000,
+      "timeframeDays": 90,
+      "expirationDate": "2026-06-30T23:59:59Z",
+      "isTargeted": false,
+      "source": "Public Offer"
+    },
+    {
+      "id": "amex-gold-offer-2026",
+      "cardId": "amex-gold",
+      "title": "60K Welcome Offer",
+      "description": "Earn 60,000 Membership Rewards points after spending $6,000 in the first 6 months.",
+      "bonusPoints": 60000,
+      "bonusCurrency": "Membership Rewards",
+      "spendRequired": 6000,
+      "timeframeDays": 180,
+      "expirationDate": null,
+      "isTargeted": false,
+      "source": "Public Offer"
+    }
+  ],
+  "transferPartners": [
+    {"id": "united", "name": "United MileagePlus", "type": "airline", "transferRatio": 1.0, "fromPrograms": ["chase-ur"]},
+    {"id": "hyatt", "name": "World of Hyatt", "type": "hotel", "transferRatio": 1.0, "fromPrograms": ["chase-ur"]},
+    {"id": "southwest", "name": "Southwest Rapid Rewards", "type": "airline", "transferRatio": 1.0, "fromPrograms": ["chase-ur"]},
+    {"id": "marriott", "name": "Marriott Bonvoy", "type": "hotel", "transferRatio": 1.0, "fromPrograms": ["chase-ur"]},
+    {"id": "british-airways", "name": "British Airways Avios", "type": "airline", "transferRatio": 1.0, "fromPrograms": ["chase-ur", "amex-mr", "capital-one"]},
+    {"id": "air-france", "name": "Air France/KLM Flying Blue", "type": "airline", "transferRatio": 1.0, "fromPrograms": ["chase-ur", "amex-mr", "capital-one"]},
+    {"id": "delta", "name": "Delta SkyMiles", "type": "airline", "transferRatio": 1.0, "fromPrograms": ["amex-mr"]},
+    {"id": "hilton", "name": "Hilton Honors", "type": "hotel", "transferRatio": 2.0, "fromPrograms": ["amex-mr"]},
+    {"id": "ana", "name": "ANA Mileage Club", "type": "airline", "transferRatio": 1.0, "fromPrograms": ["amex-mr"]},
+    {"id": "singapore", "name": "Singapore KrisFlyer", "type": "airline", "transferRatio": 1.0, "fromPrograms": ["amex-mr", "citi-typ", "capital-one"]},
+    {"id": "turkish-airlines", "name": "Turkish Airlines Miles&Smiles", "type": "airline", "transferRatio": 1.0, "fromPrograms": ["citi-typ", "capital-one"]},
+    {"id": "virgin-atlantic", "name": "Virgin Atlantic Flying Club", "type": "airline", "transferRatio": 1.0, "fromPrograms": ["citi-typ", "chase-ur"]},
+    {"id": "avianca", "name": "Avianca LifeMiles", "type": "airline", "transferRatio": 1.0, "fromPrograms": ["citi-typ", "capital-one"]},
+    {"id": "air-canada", "name": "Air Canada Aeroplan", "type": "airline", "transferRatio": 1.0, "fromPrograms": ["chase-ur", "capital-one"]},
+    {"id": "wyndham", "name": "Wyndham Rewards", "type": "hotel", "transferRatio": 1.0, "fromPrograms": ["capital-one"]}
+  ],
+  "churnRules": [
+    {
+      "id": "chase-5-24",
+      "issuer": "chase",
+      "ruleType": "applicationEligibility",
+      "category": "velocityLimit",
+      "name": "5/24 Rule",
+      "description": "Chase denies applications with 5+ new cards in 24 months",
+      "details": "Chase will deny most card applications if you have opened 5 or more cards across all issuers in the past 24 months. Business cards from some issuers don't count.",
+      "windowMonths": 24,
+      "maxCards": 5,
+      "countsAllIssuers": true,
+      "businessExempt": true
+    },
+    {
+      "id": "chase-one-sapphire",
+      "issuer": "chase",
+      "ruleType": "bonusEligibility",
+      "category": "productFamily",
+      "name": "One Sapphire Rule",
+      "description": "Cannot hold both Sapphire cards or earn bonus within 48 months",
+      "details": "You cannot hold both the Sapphire Preferred and Sapphire Reserve simultaneously. You cannot receive a Sapphire bonus if you received one in the past 48 months.",
+      "requiresNotCurrentlyHolding": true,
+      "cooldownMonths": 48,
+      "cooldownStartsFrom": "bonusReceived",
+      "productFamily": "sapphire",
+      "conflictingProducts": ["chase-sapphire-preferred", "chase-sapphire-reserve"]
+    },
+    {
+      "id": "amex-once-per-lifetime",
+      "issuer": "amex",
+      "ruleType": "bonusEligibility",
+      "category": "lifetimeLanguage",
+      "name": "Once Per Lifetime",
+      "description": "Welcome bonuses limited to once per lifetime per product",
+      "details": "Amex welcome bonuses are limited to once per lifetime per card product. If you have ever had the card, you are not eligible for the bonus again. Some targeted offers may bypass this."
+    },
+    {
+      "id": "amex-2-90",
+      "issuer": "amex",
+      "ruleType": "applicationEligibility",
+      "category": "velocityLimit",
+      "name": "2/90 Rule",
+      "description": "Maximum 2 Amex credit card approvals per 90 days",
+      "details": "Amex generally limits you to 2 new credit card approvals in a rolling 90-day window. Charge cards (Gold, Platinum) are exempt from this limit.",
+      "windowMonths": 3,
+      "maxCards": 2,
+      "countsAllIssuers": false
+    },
+    {
+      "id": "citi-24-month",
+      "issuer": "citi",
+      "ruleType": "bonusEligibility",
+      "category": "bonusCooldown",
+      "name": "24-Month Bonus Rule",
+      "description": "No bonus if received one or closed same card in past 24 months",
+      "details": "You cannot receive a Citi bonus if you received a bonus for the same card in the past 24 months, or closed the card in the past 24 months.",
+      "cooldownMonths": 24,
+      "cooldownStartsFrom": "bonusReceived",
+      "requiresNotCurrentlyHolding": true
+    },
+    {
+      "id": "citi-1-8-2-65",
+      "issuer": "citi",
+      "ruleType": "applicationEligibility",
+      "category": "velocityLimit",
+      "name": "1/8 and 2/65 Rules",
+      "description": "1 application per 8 days, 2 per 65 days",
+      "details": "You can only apply for 1 Citi card per 8 days, and 2 Citi cards per 65 days. Applications beyond this will be automatically denied."
+    },
+    {
+      "id": "capital-one-6-month",
+      "issuer": "capitalOne",
+      "ruleType": "applicationEligibility",
+      "category": "cooldownPeriod",
+      "name": "6-Month Cooldown",
+      "description": "Generally limited to 1 new card per 6 months",
+      "details": "Capital One generally limits approvals to 1 new card per 6 months. Applying too frequently will result in denials."
+    },
+    {
+      "id": "capital-one-max-cards",
+      "issuer": "capitalOne",
+      "ruleType": "applicationEligibility",
+      "category": "maxCards",
+      "name": "2 Consumer Card Limit",
+      "description": "Maximum 2 open consumer credit cards",
+      "details": "Capital One typically limits you to 2 open consumer credit cards at a time. Close an existing card before applying for a new one.",
+      "maxCards": 2
+    },
+    {
+      "id": "barclays-6-24",
+      "issuer": "barclays",
+      "ruleType": "applicationEligibility",
+      "category": "velocityLimit",
+      "name": "6/24 Sensitivity",
+      "description": "Inquiry sensitive with 6+ accounts in 24 months",
+      "details": "Barclays is sensitive to the number of recent inquiries and new accounts. Having 6+ new accounts in 24 months may result in denial.",
+      "windowMonths": 24,
+      "maxCards": 6,
+      "countsAllIssuers": true
+    },
+    {
+      "id": "barclays-24-month-bonus",
+      "issuer": "barclays",
+      "ruleType": "bonusEligibility",
+      "category": "bonusCooldown",
+      "name": "24-Month Bonus Rule",
+      "description": "No bonus if received one on same card in past 24 months",
+      "details": "You are not eligible for a Barclays welcome bonus if you received a bonus on the same card in the past 24 months.",
+      "cooldownMonths": 24,
+      "cooldownStartsFrom": "bonusReceived"
+    },
+    {
+      "id": "us-bank-inquiry-sensitive",
+      "issuer": "usBank",
+      "ruleType": "applicationEligibility",
+      "category": "velocityLimit",
+      "name": "Inquiry Sensitive",
+      "description": "Very sensitive to recent inquiries and new accounts",
+      "details": "US Bank is very inquiry sensitive. Having more than 2-3 recent hard inquiries or new accounts in the past 12 months can lead to denial.",
+      "windowMonths": 12,
+      "maxCards": 3,
+      "countsAllIssuers": true
+    },
+    {
+      "id": "us-bank-existing-relationship",
+      "issuer": "usBank",
+      "ruleType": "applicationEligibility",
+      "category": "existingRelationship",
+      "name": "Existing Relationship Preferred",
+      "description": "Banking relationship strongly preferred for approval",
+      "details": "US Bank strongly prefers applicants with an existing banking relationship (checking or savings account) before approving credit cards."
+    },
+    {
+      "id": "wells-fargo-15-month",
+      "issuer": "wellsFargo",
+      "ruleType": "bonusEligibility",
+      "category": "bonusCooldown",
+      "name": "15-Month Bonus Rule",
+      "description": "No bonus if received one on same card in past 15 months",
+      "details": "You are not eligible for a Wells Fargo welcome bonus if you received a bonus on the same card in the past 15 months, or if you currently hold the card.",
+      "cooldownMonths": 15,
+      "cooldownStartsFrom": "bonusReceived",
+      "requiresNotCurrentlyHolding": true
+    },
+    {
+      "id": "boa-2-3-4",
+      "issuer": "bankOfAmerica",
+      "ruleType": "applicationEligibility",
+      "category": "velocityLimit",
+      "name": "2/3/4 Rule",
+      "description": "2 per 2 months, 3 per 12 months, 4 per 24 months",
+      "details": "Bank of America limits approvals to 2 new cards per rolling 2-month period, 3 per 12 months, and 4 per 24 months."
+    },
+    {
+      "id": "boa-24-month-bonus",
+      "issuer": "bankOfAmerica",
+      "ruleType": "bonusEligibility",
+      "category": "bonusCooldown",
+      "name": "24-Month Bonus Rule",
+      "description": "No bonus if received one on same card in past 24 months",
+      "details": "You are not eligible for a Bank of America welcome bonus if you received a bonus on the same card in the past 24 months.",
+      "cooldownMonths": 24,
+      "cooldownStartsFrom": "bonusReceived"
+    },
+    {
+      "id": "discover-24-month-bonus",
+      "issuer": "discover",
+      "ruleType": "bonusEligibility",
+      "category": "bonusCooldown",
+      "name": "24-Month Bonus Rule",
+      "description": "No bonus if received one on same product in past 24 months",
+      "details": "You are not eligible for a Discover welcome bonus if you received a bonus on the same card product in the past 24 months.",
+      "cooldownMonths": 24,
+      "cooldownStartsFrom": "bonusReceived"
+    },
+    {
+      "id": "discover-one-per-12",
+      "issuer": "discover",
+      "ruleType": "applicationEligibility",
+      "category": "cooldownPeriod",
+      "name": "1 Card Per 12 Months",
+      "description": "Generally limited to 1 new card per 12 months",
+      "details": "Discover generally limits new card approvals to 1 per 12-month period."
+    }
+  ]
+}

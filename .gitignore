@@ -36,3 +36,9 @@ cardflow-ios/build/
 cardflow-ios/CardFlow.xcodeproj/xcuserdata/
 cardflow-ios/CardFlow.xcodeproj/project.xcworkspace/xcuserdata/
 *.xcuserstate
+
+# Scraper
+scraper/node_modules/
+scraper/dist/
+scraper/logs/
+data/cache/
