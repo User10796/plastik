@@ -1,98 +1,54 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  PLASTIK APP ICON - FINAL VERSION
+  Style: Sunset Glass Cards
+  Colors: Purple (#7c3aed) → Pink (#db2777) → Orange (#f59e0b)
+  
+  IMPORTANT: This is the ONLY correct version.
+  - NO card network logos (no Mastercard circles)
+  - NO "VISA" text
+  - Just clean glass cards with EMV chip
+-->
 <svg viewBox="0 0 1024 1024" xmlns="http://www.w3.org/2000/svg">
   <defs>
     <linearGradient id="bg" x1="0%" y1="0%" x2="100%" y2="100%">
-      <stop offset="0%" style="stop-color:#0f172a"/>
-      <stop offset="100%" style="stop-color:#1e293b"/>
-    </linearGradient>
-    <linearGradient id="card1" x1="0%" y1="0%" x2="100%" y2="100%">
-      <stop offset="0%" style="stop-color:#6366f1"/>
-      <stop offset="100%" style="stop-color:#8b5cf6"/>
-    </linearGradient>
-    <linearGradient id="card2" x1="0%" y1="0%" x2="100%" y2="100%">
-      <stop offset="0%" style="stop-color:#ec4899"/>
-      <stop offset="100%" style="stop-color:#f43f5e"/>
-    </linearGradient>
-    <linearGradient id="card3" x1="0%" y1="0%" x2="100%" y2="100%">
-      <stop offset="0%" style="stop-color:#f59e0b"/>
-      <stop offset="100%" style="stop-color:#f97316"/>
-    </linearGradient>
-    <linearGradient id="shine" x1="0%" y1="0%" x2="100%" y2="100%">
-      <stop offset="0%" style="stop-color:#fff;stop-opacity:0.15"/>
-      <stop offset="100%" style="stop-color:#fff;stop-opacity:0"/>
+      <stop offset="0%" style="stop-color:#7c3aed"/>
+      <stop offset="50%" style="stop-color:#db2777"/>
+      <stop offset="100%" style="stop-color:#f59e0b"/>
     </linearGradient>
   </defs>
-
-  <!-- Background -->
-  <rect width="1024" height="1024" rx="224" fill="url(#bg)"/>
-
-  <!-- Subtle grid pattern -->
-  <line x1="0" y1="340" x2="1024" y2="340" stroke="rgba(255,255,255,0.03)" stroke-width="1"/>
-  <line x1="0" y1="512" x2="1024" y2="512" stroke="rgba(255,255,255,0.03)" stroke-width="1"/>
-  <line x1="0" y1="684" x2="1024" y2="684" stroke="rgba(255,255,255,0.03)" stroke-width="1"/>
-  <line x1="340" y1="0" x2="340" y2="1024" stroke="rgba(255,255,255,0.03)" stroke-width="1"/>
-  <line x1="512" y1="0" x2="512" y2="1024" stroke="rgba(255,255,255,0.03)" stroke-width="1"/>
-  <line x1="684" y1="0" x2="684" y2="1024" stroke="rgba(255,255,255,0.03)" stroke-width="1"/>
-
-  <!-- Back card (gold) — tilted left -->
-  <g transform="translate(512, 540) rotate(-10)">
-    <rect x="-260" y="-160" width="520" height="320" rx="32" fill="url(#card3)"/>
-    <rect x="-260" y="-160" width="520" height="320" rx="32" fill="url(#shine)"/>
-    <rect x="-260" y="-60" width="520" height="60" fill="rgba(0,0,0,0.15)"/>
+  
+  <!-- Background - Sunset Gradient -->
+  <rect width="1024" height="1024" fill="url(#bg)"/>
+  
+  <!-- Background blur circles for depth -->
+  <circle cx="200" cy="200" r="200" fill="#fff" opacity="0.15"/>
+  <circle cx="840" cy="800" r="240" fill="#fff" opacity="0.1"/>
+  <circle cx="900" cy="240" r="120" fill="#fff" opacity="0.1"/>
+  
+  <!-- Back card (bottommost) -->
+  <g transform="translate(512, 580) rotate(-12)">
+    <rect x="-310" y="-190" width="620" height="380" rx="48" fill="rgba(255,255,255,0.1)" stroke="rgba(255,255,255,0.25)" stroke-width="4"/>
   </g>
-
-  <!-- Middle card (pink) — slight tilt right -->
-  <g transform="translate(512, 490) rotate(4)">
-    <rect x="-260" y="-160" width="520" height="320" rx="32" fill="url(#card2)"/>
-    <rect x="-260" y="-160" width="520" height="320" rx="32" fill="url(#shine)"/>
-    <!-- Magnetic stripe -->
-    <rect x="-260" y="-60" width="520" height="60" fill="rgba(0,0,0,0.15)"/>
-    <!-- EMV chip -->
-    <rect x="-200" y="-130" width="80" height="60" rx="10" fill="rgba(255,255,255,0.3)"/>
+  
+  <!-- Middle card -->
+  <g transform="translate(512, 520) rotate(3)">
+    <rect x="-310" y="-190" width="620" height="380" rx="48" fill="rgba(255,255,255,0.18)" stroke="rgba(255,255,255,0.35)" stroke-width="4"/>
+    <!-- Chip on middle card -->
+    <rect x="-250" y="-130" width="116" height="88" rx="16" fill="rgba(255,255,255,0.25)"/>
   </g>
-
-  <!-- Front card (indigo/purple) — prominent -->
-  <g transform="translate(512, 430) rotate(-2)">
-    <rect x="-260" y="-160" width="520" height="320" rx="32" fill="url(#card1)"/>
-    <rect x="-260" y="-160" width="520" height="320" rx="32" fill="url(#shine)"/>
-
-    <!-- EMV chip detail -->
-    <rect x="-200" y="-120" width="88" height="66" rx="12" fill="rgba(255,255,255,0.25)" stroke="rgba(255,255,255,0.4)" stroke-width="2"/>
-    <line x1="-200" y1="-87" x2="-112" y2="-87" stroke="rgba(255,255,255,0.3)" stroke-width="1.5"/>
-    <line x1="-156" y1="-120" x2="-156" y2="-54" stroke="rgba(255,255,255,0.3)" stroke-width="1.5"/>
-
-    <!-- Contactless waves -->
-    <g transform="translate(-80, -87)" fill="none" stroke="rgba(255,255,255,0.5)" stroke-width="3" stroke-linecap="round">
-      <path d="M0,8 A12,12 0 0,1 0,-8"/>
-      <path d="M6,14 A20,20 0 0,1 6,-14"/>
-      <path d="M12,20 A28,28 0 0,1 12,-20"/>
-    </g>
-
-    <!-- Card number dots -->
-    <g transform="translate(0, 30)">
-      <circle cx="-180" cy="0" r="6" fill="rgba(255,255,255,0.6)"/>
-      <circle cx="-158" cy="0" r="6" fill="rgba(255,255,255,0.6)"/>
-      <circle cx="-136" cy="0" r="6" fill="rgba(255,255,255,0.6)"/>
-      <circle cx="-114" cy="0" r="6" fill="rgba(255,255,255,0.6)"/>
-      <circle cx="-72" cy="0" r="6" fill="rgba(255,255,255,0.6)"/>
-      <circle cx="-50" cy="0" r="6" fill="rgba(255,255,255,0.6)"/>
-      <circle cx="-28" cy="0" r="6" fill="rgba(255,255,255,0.6)"/>
-      <circle cx="-6" cy="0" r="6" fill="rgba(255,255,255,0.6)"/>
-      <circle cx="36" cy="0" r="6" fill="rgba(255,255,255,0.6)"/>
-      <circle cx="58" cy="0" r="6" fill="rgba(255,255,255,0.6)"/>
-      <circle cx="80" cy="0" r="6" fill="rgba(255,255,255,0.6)"/>
-      <circle cx="102" cy="0" r="6" fill="rgba(255,255,255,0.6)"/>
-      <text x="144" y="7" font-family="SF Pro Display, system-ui, sans-serif" font-size="28" font-weight="600" fill="rgba(255,255,255,0.8)" letter-spacing="3">4242</text>
-    </g>
-
-    <!-- Network logo circles (Mastercard-style) -->
-    <g transform="translate(190, 110)">
-      <circle cx="0" cy="0" r="28" fill="rgba(255,255,255,0.35)"/>
-      <circle cx="22" cy="0" r="28" fill="rgba(255,255,255,0.25)"/>
-    </g>
+  
+  <!-- Front card (topmost) -->
+  <g transform="translate(512, 450) rotate(15)">
+    <rect x="-310" y="-190" width="620" height="380" rx="48" fill="rgba(255,255,255,0.28)" stroke="rgba(255,255,255,0.5)" stroke-width="5"/>
+    <!-- Chip -->
+    <rect x="-250" y="-130" width="116" height="88" rx="16" fill="rgba(255,255,255,0.4)"/>
+    <!-- Chip detail lines -->
+    <line x1="-250" y1="-100" x2="-134" y2="-100" stroke="rgba(255,255,255,0.3)" stroke-width="3"/>
+    <line x1="-250" y1="-70" x2="-134" y2="-70" stroke="rgba(255,255,255,0.3)" stroke-width="3"/>
+    <line x1="-210" y1="-130" x2="-210" y2="-42" stroke="rgba(255,255,255,0.3)" stroke-width="3"/>
+    <line x1="-174" y1="-130" x2="-174" y2="-42" stroke="rgba(255,255,255,0.3)" stroke-width="3"/>
+    <!-- Shine effect on top edge -->
+    <path d="M-310 -142 Q0 -190 310 -142 L310 -190 Q0 -142 -310 -190 Z" fill="rgba(255,255,255,0.12)"/>
   </g>
-
-  <!-- Ambient glow behind cards -->
-  <circle cx="512" cy="460" r="200" fill="rgba(99,102,241,0.08)"/>
-  <circle cx="400" cy="560" r="120" fill="rgba(236,72,153,0.06)"/>
-  <circle cx="650" cy="520" r="100" fill="rgba(245,158,11,0.06)"/>
 </svg>
