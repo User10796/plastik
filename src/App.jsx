@@ -2766,6 +2766,8 @@ Return ONLY valid JSON.`
 
 export default function CreditCardTracker() {
   const [activeTab, setActiveTab] = useState('dashboard');
+  const [activeSection, setActiveSection] = useState('wallet');
+  const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
   const [cards, setCards] = useState([]);
   const [pointsBalances, setPointsBalances] = useState({});
   const [companionPasses, setCompanionPasses] = useState([]);
@@ -2782,6 +2784,20 @@ export default function CreditCardTracker() {
   const [holders, setHolders] = useState(['Sterling', 'Spouse']);
   const [showSettings, setShowSettings] = useState(false);
   const [newHolderName, setNewHolderName] = useState('');
+
+  // Sidebar navigation structure
+  const sidebarSections = [
+    { id: 'wallet', label: 'Wallet', icon: '💳', group: 'OVERVIEW', defaultTab: 'dashboard', subTabs: ['dashboard', 'points', 'payoff'] },
+    { id: 'cards', label: 'Cards', icon: '🗂', group: 'MANAGE', defaultTab: 'cards', subTabs: ['cards', 'fees'] },
+    { id: 'offers', label: 'Offers', icon: '🏷', group: 'MANAGE', defaultTab: 'offers', subTabs: ['offers'] },
+    { id: 'churn', label: 'Churn Tracker', icon: '📊', group: 'MANAGE', defaultTab: 'applications', subTabs: ['applications', 'strategy'] },
+  ];
+
+  const switchSection = (sectionId) => {
+    setActiveSection(sectionId);
+    const section = sidebarSections.find(s => s.id === sectionId);
+    if (section) setActiveTab(section.defaultTab);
+  };
   const [icloudStatus, setIcloudStatus] = useState({ available: false, lastSync: null });
 
   // Color palette for holder badges
@@ -2798,18 +2814,22 @@ export default function CreditCardTracker() {
     return holderColors[(idx >= 0 ? idx : 0) % holderColors.length];
   };
 
+  // Helper: safe storage access (works in both Electron and browser)
+  const storageGet = (key) => window.storage ? window.storage.get(key).catch(() => null) : Promise.resolve(null);
+  const storageSet = (key, value) => window.storage ? window.storage.set(key, value).catch(console.error) : Promise.resolve();
+
   // Load data from persistent storage
   useEffect(() => {
     const loadData = async () => {
       try {
         const [cardsResult, pointsResult, passesResult, apiKeyResult, applicationsResult, creditPullsResult, holdersResult] = await Promise.all([
-          window.storage.get('cc-tracker-cards').catch(() => null),
-          window.storage.get('cc-tracker-points').catch(() => null),
-          window.storage.get('cc-tracker-passes').catch(() => null),
-          window.storage.get('cc-tracker-apikey').catch(() => null),
-          window.storage.get('cc-tracker-applications').catch(() => null),
-          window.storage.get('cc-tracker-creditpulls').catch(() => null),
-          window.storage.get('cc-tracker-holders').catch(() => null)
+          storageGet('cc-tracker-cards'),
+          storageGet('cc-tracker-points'),
+          storageGet('cc-tracker-passes'),
+          storageGet('cc-tracker-apikey'),
+          storageGet('cc-tracker-applications'),
+          storageGet('cc-tracker-creditpulls'),
+          storageGet('cc-tracker-holders')
         ]);
 
         setCards(cardsResult?.value ? JSON.parse(cardsResult.value) : initialCards);
@@ -2856,43 +2876,43 @@ export default function CreditCardTracker() {
   // Save data whenever it changes
   useEffect(() => {
     if (!isLoading && cards.length > 0) {
-      window.storage.set('cc-tracker-cards', JSON.stringify(cards)).catch(console.error);
+      storageSet('cc-tracker-cards', JSON.stringify(cards));
     }
   }, [cards, isLoading]);
 
   useEffect(() => {
     if (!isLoading && Object.keys(pointsBalances).length > 0) {
-      window.storage.set('cc-tracker-points', JSON.stringify(pointsBalances)).catch(console.error);
+      storageSet('cc-tracker-points', JSON.stringify(pointsBalances));
     }
   }, [pointsBalances, isLoading]);
 
   useEffect(() => {
     if (!isLoading && companionPasses.length > 0) {
-      window.storage.set('cc-tracker-passes', JSON.stringify(companionPasses)).catch(console.error);
+      storageSet('cc-tracker-passes', JSON.stringify(companionPasses));
     }
   }, [companionPasses, isLoading]);
 
   useEffect(() => {
     if (!isLoading) {
-      window.storage.set('cc-tracker-applications', JSON.stringify(applications)).catch(console.error);
+      storageSet('cc-tracker-applications', JSON.stringify(applications));
     }
   }, [applications, isLoading]);
 
   useEffect(() => {
     if (!isLoading) {
-      window.storage.set('cc-tracker-creditpulls', JSON.stringify(creditPulls)).catch(console.error);
+      storageSet('cc-tracker-creditpulls', JSON.stringify(creditPulls));
     }
   }, [creditPulls, isLoading]);
 
   useEffect(() => {
     if (!isLoading && holders.length > 0) {
-      window.storage.set('cc-tracker-holders', JSON.stringify(holders)).catch(console.error);
+      storageSet('cc-tracker-holders', JSON.stringify(holders));
     }
   }, [holders, isLoading]);
 
   const saveApiKey = async (key) => {
     setApiKey(key);
-    await window.storage.set('cc-tracker-apikey', key).catch(console.error);
+    await storageSet('cc-tracker-apikey', key);
     setShowSettings(false);
   };
 
@@ -3090,7 +3110,8 @@ Return ONLY valid JSON, no other text.`
       minHeight: '100vh',
       background: 'linear-gradient(135deg, #0f172a 0%, #1e293b 50%, #0f172a 100%)',
       fontFamily: '"DM Sans", system-ui, sans-serif',
-      color: '#e2e8f0'
+      color: '#e2e8f0',
+      display: 'flex'
     }}>
       <style>{`
         @import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap');
@@ -3102,26 +3123,144 @@ Return ONLY valid JSON, no other text.`
           box-shadow: 0 20px 40px rgba(0,0,0,0.3);
         }
         
-        .tab-btn {
-          padding: 12px 24px;
+        .sidebar {
+          width: 240px;
+          min-width: 240px;
+          height: 100vh;
+          background: rgba(15, 23, 42, 0.95);
+          border-right: 1px solid #334155;
+          display: flex;
+          flex-direction: column;
+          padding: 0;
+          overflow-y: auto;
+          transition: width 0.2s ease, min-width 0.2s ease;
+          position: sticky;
+          top: 0;
+        }
+
+        .sidebar.collapsed {
+          width: 64px;
+          min-width: 64px;
+        }
+
+        .sidebar-group-label {
+          font-size: 0.7rem;
+          font-weight: 600;
+          color: #475569;
+          letter-spacing: 0.08em;
+          text-transform: uppercase;
+          padding: 20px 20px 6px;
+        }
+
+        .sidebar.collapsed .sidebar-group-label {
+          visibility: hidden;
+          height: 20px;
+          padding: 20px 0 6px;
+        }
+
+        .sidebar-item {
+          display: flex;
+          align-items: center;
+          gap: 12px;
+          padding: 10px 20px;
+          border: none;
+          background: transparent;
+          color: #94a3b8;
+          font-size: 0.9rem;
+          font-weight: 500;
+          cursor: pointer;
+          transition: all 0.15s;
+          font-family: inherit;
+          width: 100%;
+          text-align: left;
+          border-radius: 0;
+          position: relative;
+        }
+
+        .sidebar.collapsed .sidebar-item {
+          justify-content: center;
+          padding: 10px;
+        }
+
+        .sidebar.collapsed .sidebar-item-label {
+          display: none;
+        }
+
+        .sidebar-item:hover {
+          background: rgba(51, 65, 85, 0.5);
+          color: #e2e8f0;
+        }
+
+        .sidebar-item.active {
+          background: rgba(245, 158, 11, 0.1);
+          color: #f59e0b;
+        }
+
+        .sidebar-item.active::before {
+          content: '';
+          position: absolute;
+          left: 0;
+          top: 4px;
+          bottom: 4px;
+          width: 3px;
+          background: #f59e0b;
+          border-radius: 0 3px 3px 0;
+        }
+
+        .sidebar-icon {
+          font-size: 1.15rem;
+          width: 24px;
+          text-align: center;
+          flex-shrink: 0;
+        }
+
+        .sub-tab-bar {
+          display: flex;
+          gap: 4px;
+          padding: 8px 16px;
+          background: rgba(30, 41, 59, 0.5);
+          border-bottom: 1px solid #334155;
+          margin-bottom: 24px;
+          border-radius: 0;
+        }
+
+        .sub-tab-btn {
+          padding: 8px 16px;
           border: none;
           background: transparent;
           color: #64748b;
-          font-size: 0.95rem;
+          font-size: 0.85rem;
           font-weight: 500;
           cursor: pointer;
-          border-bottom: 2px solid transparent;
-          transition: all 0.2s;
+          border-radius: 6px;
+          transition: all 0.15s;
           font-family: inherit;
         }
-        
-        .tab-btn:hover {
+
+        .sub-tab-btn:hover {
           color: #94a3b8;
+          background: rgba(51, 65, 85, 0.3);
         }
-        
-        .tab-btn.active {
+
+        .sub-tab-btn.active {
           color: #f59e0b;
-          border-bottom-color: #f59e0b;
+          background: rgba(245, 158, 11, 0.1);
+        }
+
+        .sidebar-toggle {
+          background: transparent;
+          border: none;
+          color: #64748b;
+          cursor: pointer;
+          padding: 8px;
+          font-size: 1.1rem;
+          border-radius: 6px;
+          transition: all 0.15s;
+        }
+
+        .sidebar-toggle:hover {
+          color: #94a3b8;
+          background: rgba(51, 65, 85, 0.3);
         }
         
         .progress-bar {
@@ -3213,58 +3352,79 @@ Return ONLY valid JSON, no other text.`
         }
       `}</style>
 
-      {/* Header */}
-      <header style={{
-        background: 'rgba(15, 23, 42, 0.8)',
-        borderBottom: '1px solid #334155',
-        padding: '20px 32px',
-        backdropFilter: 'blur(12px)',
-        position: 'sticky',
-        top: 0,
-        zIndex: 50
-      }}>
-        <div style={{ maxWidth: '1400px', margin: '0 auto', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-          <div style={{ display: 'flex', alignItems: 'center' }}>
-            <PlastikLogo size={44} />
-            <div>
-              <h1 style={{ 
-                margin: 0, 
-                fontSize: '1.75rem', 
-                fontWeight: 700,
-                background: 'linear-gradient(135deg, #f59e0b 0%, #fbbf24 100%)',
-                WebkitBackgroundClip: 'text',
-                WebkitTextFillColor: 'transparent'
-              }}>
-                Plastik
-              </h1>
-              <p style={{ margin: '2px 0 0', color: '#64748b', fontSize: '0.85rem' }}>Credit Card Benefits Tracker</p>
+      {/* Sidebar */}
+      <aside className={`sidebar ${sidebarCollapsed ? 'collapsed' : ''}`}>
+        {/* Logo area */}
+        <div style={{ padding: sidebarCollapsed ? '16px 8px' : '20px 20px 8px', display: 'flex', alignItems: 'center', justifyContent: sidebarCollapsed ? 'center' : 'space-between' }}>
+          {!sidebarCollapsed && (
+            <div style={{ display: 'flex', alignItems: 'center' }}>
+              <PlastikLogo size={32} />
+              <div>
+                <div style={{
+                  fontSize: '1.15rem',
+                  fontWeight: 700,
+                  background: 'linear-gradient(135deg, #f59e0b 0%, #fbbf24 100%)',
+                  WebkitBackgroundClip: 'text',
+                  WebkitTextFillColor: 'transparent'
+                }}>Plastik</div>
+              </div>
             </div>
-          </div>
+          )}
+          {sidebarCollapsed && <PlastikLogo size={28} />}
+          <button className="sidebar-toggle" onClick={() => setSidebarCollapsed(!sidebarCollapsed)} title={sidebarCollapsed ? 'Expand sidebar' : 'Collapse sidebar'}>
+            {sidebarCollapsed ? '▶' : '◀'}
+          </button>
+        </div>
+
+        {/* Nav groups */}
+        <div style={{ flex: 1 }}>
+          {['OVERVIEW', 'MANAGE'].map(group => (
+            <div key={group}>
+              <div className="sidebar-group-label">{group}</div>
+              {sidebarSections.filter(s => s.group === group).map(section => (
+                <button
+                  key={section.id}
+                  className={`sidebar-item ${activeSection === section.id ? 'active' : ''}`}
+                  onClick={() => switchSection(section.id)}
+                  title={sidebarCollapsed ? section.label : undefined}
+                >
+                  <span className="sidebar-icon">{section.icon}</span>
+                  <span className="sidebar-item-label">{section.label}</span>
+                </button>
+              ))}
+            </div>
+          ))}
+        </div>
+
+        {/* Bottom section: Settings + Sync */}
+        <div style={{ borderTop: '1px solid #334155', padding: '8px 0' }}>
           <button
+            className={`sidebar-item`}
             onClick={() => setShowSettings(true)}
-            className="btn-secondary"
-            style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '1.1rem' }}
-            title="Settings"
+            title={sidebarCollapsed ? 'Settings' : undefined}
           >
-            <span style={{
-              width: '8px',
-              height: '8px',
-              borderRadius: '50%',
-              background: apiKey ? '#22c55e' : '#ef4444'
-            }}></span>
-            ⚙ Settings
+            <span className="sidebar-icon">⚙</span>
+            <span className="sidebar-item-label">Settings</span>
+            {!sidebarCollapsed && (
+              <span style={{
+                width: '8px',
+                height: '8px',
+                borderRadius: '50%',
+                background: apiKey ? '#22c55e' : '#ef4444',
+                marginLeft: 'auto'
+              }}></span>
+            )}
           </button>
           <div
             style={{
               display: 'flex',
               alignItems: 'center',
-              gap: '6px',
+              gap: sidebarCollapsed ? 0 : '8px',
+              justifyContent: sidebarCollapsed ? 'center' : 'flex-start',
               color: icloudStatus.available ? '#22c55e' : '#64748b',
-              fontSize: '0.8rem',
+              fontSize: '0.75rem',
               cursor: 'pointer',
-              padding: '4px 8px',
-              borderRadius: '8px',
-              background: 'rgba(30, 41, 59, 0.5)'
+              padding: sidebarCollapsed ? '8px' : '6px 20px',
             }}
             title={icloudStatus.available
               ? `iCloud synced${icloudStatus.lastSync ? ' • ' + new Date(icloudStatus.lastSync).toLocaleTimeString() : ''}`
@@ -3279,32 +3439,35 @@ Return ONLY valid JSON, no other text.`
               }
             }}
           >
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
               <path d="M18 10h-1.26A8 8 0 1 0 9 20h9a5 5 0 0 0 0-10z"/>
             </svg>
-            {icloudStatus.available ? 'Synced' : 'Local'}
+            {!sidebarCollapsed && (icloudStatus.available ? 'Synced' : 'Local')}
           </div>
         </div>
-      </header>
+      </aside>
 
-      {/* Navigation */}
-      <nav style={{ 
-        background: 'rgba(30, 41, 59, 0.5)', 
-        borderBottom: '1px solid #334155',
-        padding: '0 32px'
-      }}>
-        <div style={{ maxWidth: '1400px', margin: '0 auto', display: 'flex', gap: '8px' }}>
-          {['dashboard', 'cards', 'points', 'applications', 'fees', 'import', 'payoff', 'strategy'].map(tab => (
-            <button
-              key={tab}
-              className={`tab-btn ${activeTab === tab ? 'active' : ''}`}
-              onClick={() => setActiveTab(tab)}
-            >
-              {tab.charAt(0).toUpperCase() + tab.slice(1)}
-            </button>
-          ))}
-        </div>
-      </nav>
+      {/* Main Content Area */}
+      <div style={{ flex: 1, overflowY: 'auto', height: '100vh' }}>
+        {/* Sub-tab bar */}
+        {activeSection !== 'settings' && (() => {
+          const section = sidebarSections.find(s => s.id === activeSection);
+          if (!section || section.subTabs.length <= 1) return null;
+          const tabLabels = { dashboard: 'Dashboard', points: 'Points', payoff: 'Payoff', cards: 'My Cards', fees: 'Fees', applications: 'Applications', strategy: 'Strategy' };
+          return (
+            <div className="sub-tab-bar">
+              {section.subTabs.map(tab => (
+                <button
+                  key={tab}
+                  className={`sub-tab-btn ${activeTab === tab ? 'active' : ''}`}
+                  onClick={() => setActiveTab(tab)}
+                >
+                  {tabLabels[tab] || tab.charAt(0).toUpperCase() + tab.slice(1)}
+                </button>
+              ))}
+            </div>
+          );
+        })()}
 
       {/* Main Content */}
       <main style={{ maxWidth: '1400px', margin: '0 auto', padding: '32px' }}>
@@ -3667,6 +3830,28 @@ Return ONLY valid JSON, no other text.`
             setCards={setCards}
             downgradePaths={downgradePaths}
           />
+        )}
+
+        {/* Offers Tab (Placeholder) */}
+        {activeTab === 'offers' && (
+          <div>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '24px' }}>
+              <h2 style={{ margin: 0, fontSize: '1.5rem', fontWeight: 600 }}>Current Offers</h2>
+            </div>
+            <div style={{
+              background: 'linear-gradient(135deg, #1e293b 0%, #334155 100%)',
+              borderRadius: '16px',
+              padding: '48px 32px',
+              textAlign: 'center',
+              border: '1px solid #334155'
+            }}>
+              <div style={{ fontSize: '3rem', marginBottom: '16px' }}>🏷</div>
+              <h3 style={{ color: '#f1f5f9', fontSize: '1.25rem', marginBottom: '8px' }}>Offers Coming Soon</h3>
+              <p style={{ color: '#64748b', fontSize: '0.95rem', maxWidth: '400px', margin: '0 auto' }}>
+                Credit card signup offers and limited-time promotions will appear here once the data feed is connected.
+              </p>
+            </div>
+          </div>
         )}
 
         {/* Import Tab */}
@@ -4284,6 +4469,7 @@ Return ONLY valid JSON, no other text.`
           </div>
         </div>
       )}
+      </div>{/* end main content wrapper */}
     </div>
   );
 }
