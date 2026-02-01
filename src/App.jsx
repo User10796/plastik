@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import Anthropic from '@anthropic-ai/sdk';
 
 // Logo component
-function CardFlowLogo({ size = 40 }) {
+function PlastikLogo({ size = 40 }) {
   return (
     <svg viewBox="0 0 200 200" width={size} height={size} style={{ marginRight: '12px' }}>
       <defs>
@@ -3225,7 +3225,7 @@ Return ONLY valid JSON, no other text.`
       }}>
         <div style={{ maxWidth: '1400px', margin: '0 auto', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
           <div style={{ display: 'flex', alignItems: 'center' }}>
-            <CardFlowLogo size={44} />
+            <PlastikLogo size={44} />
             <div>
               <h1 style={{ 
                 margin: 0, 
@@ -3235,7 +3235,7 @@ Return ONLY valid JSON, no other text.`
                 WebkitBackgroundClip: 'text',
                 WebkitTextFillColor: 'transparent'
               }}>
-                CardFlow
+                Plastik
               </h1>
               <p style={{ margin: '2px 0 0', color: '#64748b', fontSize: '0.85rem' }}>Credit Card Benefits Tracker</p>
             </div>

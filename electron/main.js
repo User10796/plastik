@@ -10,7 +10,7 @@ const storageFile = path.join(userDataPath, 'cardflow-data.json');
 // iCloud Drive path (general iCloud Drive folder, accessible by all apps)
 const iCloudContainerDir = path.join(
   os.homedir(),
-  'Library/Mobile Documents/com~apple~CloudDocs/CardFlow'
+  'Library/Mobile Documents/com~apple~CloudDocs/Plastik'
 );
 const iCloudFile = path.join(iCloudContainerDir, 'cardflow-data.json');
 let iCloudAvailable = false;

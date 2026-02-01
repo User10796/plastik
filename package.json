@@ -1,5 +1,5 @@
 {
-  "name": "cardflow",
+  "name": "plastik",
   "version": "1.0.0",
   "description": "Credit Card Benefits & Rewards Tracker",
   "main": "electron/main.js",
@@ -29,8 +29,8 @@
     "wait-on": "^7.2.0"
   },
   "build": {
-    "appId": "com.cardflow.app",
-    "productName": "CardFlow",
+    "appId": "com.plastik.app",
+    "productName": "Plastik",
     "directories": {
       "output": "dist"
     },

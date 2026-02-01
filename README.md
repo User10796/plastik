@@ -1,7 +1,7 @@
-# CardFlow
+# Plastik
 
 <p align="center">
-  <img src="public/logo.svg" alt="CardFlow Logo" width="120" height="120">
+  <img src="public/logo.svg" alt="Plastik Logo" width="120" height="120">
 </p>
 
 <p align="center">
@@ -40,8 +40,8 @@
 
 ```bash
 # Clone the repository
-git clone https://github.com/yourusername/cardflow.git
-cd cardflow
+git clone https://github.com/User10796/plastik.git
+cd plastik
 
 # Install dependencies
 npm install
@@ -67,7 +67,7 @@ npm run build:mac
 ### Project Structure
 
 ```
-cardflow/
+plastik/
 ├── package.json          # Dependencies and scripts
 ├── vite.config.js        # Vite build configuration
 ├── index.html            # HTML entry point
@@ -93,7 +93,7 @@ cardflow/
 
 ## API Integration
 
-CardFlow uses the Anthropic Claude API for:
+Plastik uses the Anthropic Claude API for:
 
 1. **Statement Parsing** - Extract data from pasted statement text
 2. **Card Analysis** - Personalized recommendations for new cards

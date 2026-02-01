@@ -41,7 +41,12 @@ class DataFeedService {
     var isLoading = false
     var error: DataFeedError?
 
-    private let feedURL = URL(string: "https://user10796.github.io/cardflow-data/cards.json")!
+    private let feedURL: URL = {
+        guard let url = URL(string: Constants.feedURL) else {
+            fatalError("Invalid feed URL in Constants — this is a programmer error")
+        }
+        return url
+    }()
     private let cacheKey = "cachedCardData"
 
     private var decoder: JSONDecoder {
