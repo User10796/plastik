@@ -12,7 +12,7 @@ import { checkDataIntegrity } from './validators/dataIntegrity.js';
 import { logger } from './utils/logger.js';
 import { PlastikData, CreditCard, ScrapeResult } from './types/index.js';
 
-const DATA_FILE = join(process.cwd(), '..', 'data', 'cardflow-data.json');
+const DATA_FILE = join(process.cwd(), '..', 'data', 'cards.json');
 
 async function main() {
   logger.info('Starting Plastik data scraper');

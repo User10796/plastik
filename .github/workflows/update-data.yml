@@ -23,24 +23,40 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout repository
+      - name: Checkout plastik repo (scraper source)
         uses: actions/checkout@v4
         with:
-          token: ${{ secrets.GITHUB_TOKEN }}
+          path: plastik
+
+      - name: Checkout plastik-data repo (data target)
+        uses: actions/checkout@v4
+        with:
+          repository: User10796/plastik-data
+          token: ${{ secrets.DATA_REPO_TOKEN }}
+          path: plastik-data
 
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
           node-version: ${{ env.NODE_VERSION }}
           cache: 'npm'
-          cache-dependency-path: scraper/package-lock.json
+          cache-dependency-path: plastik/scraper/package-lock.json
+
+      - name: Ensure data directory exists
+        run: mkdir -p plastik/data
+
+      - name: Copy existing data for merge
+        run: |
+          if [ -f plastik-data/cards.json ]; then
+            cp plastik-data/cards.json plastik/data/cards.json
+          fi
 
       - name: Install dependencies
-        working-directory: ./scraper
+        working-directory: ./plastik/scraper
         run: npm ci
 
       - name: Run scraper
-        working-directory: ./scraper
+        working-directory: ./plastik/scraper
         env:
           ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
           FORCE_UPDATE: ${{ github.event.inputs.force_update }}
@@ -48,25 +64,30 @@ jobs:
         run: npm run scrape
 
       - name: Validate data
-        working-directory: ./scraper
+        working-directory: ./plastik/scraper
         run: npm run validate
+
+      - name: Copy scraped data to plastik-data repo
+        run: cp plastik/data/cards.json plastik-data/cards.json
 
       - name: Check for changes
         id: check_changes
+        working-directory: ./plastik-data
         run: |
-          if git diff --quiet data/cardflow-data.json; then
+          if git diff --quiet cards.json; then
             echo "changed=false" >> $GITHUB_OUTPUT
           else
             echo "changed=true" >> $GITHUB_OUTPUT
           fi
 
-      - name: Commit and push changes
+      - name: Commit and push to plastik-data
         if: steps.check_changes.outputs.changed == 'true' && github.event.inputs.dry_run != 'true'
+        working-directory: ./plastik-data
         run: |
           git config --local user.email "github-actions[bot]@users.noreply.github.com"
           git config --local user.name "github-actions[bot]"
-          git add data/cardflow-data.json
-          git commit -m "chore: update plastik data [$(date +'%Y-%m-%d')]"
+          git add cards.json
+          git commit -m "chore: update card data [$(date +'%Y-%m-%d')]"
           git push
 
       - name: Upload logs as artifact
@@ -74,5 +95,5 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: scraper-logs
-          path: scraper/logs/
+          path: plastik/scraper/logs/
           retention-days: 30

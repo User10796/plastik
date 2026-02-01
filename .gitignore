@@ -41,4 +41,4 @@ cardflow-ios/Plastik.xcodeproj/project.xcworkspace/xcuserdata/
 scraper/node_modules/
 scraper/dist/
 scraper/logs/
-data/cache/
+data/

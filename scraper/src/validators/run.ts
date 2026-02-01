@@ -4,7 +4,7 @@ import { validateData } from './schemaValidator.js';
 import { checkDataIntegrity } from './dataIntegrity.js';
 import { logger } from '../utils/logger.js';
 
-const DATA_FILE = join(process.cwd(), '..', 'data', 'cardflow-data.json');
+const DATA_FILE = join(process.cwd(), '..', 'data', 'cards.json');
 
 function main() {
   logger.info('Running data validation...');
