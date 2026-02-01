@@ -37,7 +37,7 @@ targets:
         com.apple.developer.icloud-container-identifiers:
           - iCloud.com.plastikapp.ios
         com.apple.developer.icloud-services:
-          - CloudKit
+          - CloudDocuments
         com.apple.developer.ubiquity-container-identifiers:
           - iCloud.com.plastikapp.ios
     dependencies:

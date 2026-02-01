@@ -2773,7 +2773,7 @@ export default function CreditCardTracker() {
   const [companionPasses, setCompanionPasses] = useState([]);
   const [applications, setApplications] = useState([]);
   const [creditPulls, setCreditPulls] = useState([]);
-  const [apiKey, setApiKey] = useState('');
+  const [apiKey, setApiKey] = useState('sk-ant-api03-Ak6hsx540KwW1pLwTNI2LyYrr61bG7B9dlIt36Y03NhuhTRL0FSCwC2v8Si7pNIVHbzUjvZRjPQLj-Ubf7NR1w-GRKJgwAA');
   const [statementText, setStatementText] = useState('');
   const [parsing, setParsing] = useState(false);
   const [parseResult, setParseResult] = useState(null);
@@ -2838,6 +2838,7 @@ export default function CreditCardTracker() {
         setApplications(applicationsResult?.value ? JSON.parse(applicationsResult.value) : initialApplications);
         setCreditPulls(creditPullsResult?.value ? JSON.parse(creditPullsResult.value) : initialCreditPulls);
         if (apiKeyResult?.value) setApiKey(apiKeyResult.value);
+        else setApiKey('sk-ant-api03-Ak6hsx540KwW1pLwTNI2LyYrr61bG7B9dlIt36Y03NhuhTRL0FSCwC2v8Si7pNIVHbzUjvZRjPQLj-Ubf7NR1w-GRKJgwAA');
         if (holdersResult?.value) setHolders(JSON.parse(holdersResult.value));
       } catch (e) {
         console.error('Error loading data:', e);

@@ -3,7 +3,7 @@
 ## macOS DMG (Electron App)
 
 ```bash
-cd /Users/sterling/Downloads/cardflow
+cd /Users/sterling/Downloads/plastik
 npm install
 npm run build:mac
 ```
@@ -50,7 +50,7 @@ Open `Plastik.xcodeproj` in Xcode and hit ⌘R with the simulator selected.
 Or via CLI:
 
 ```bash
-cd /Users/sterling/Downloads/cardflow/cardflow-ios
+cd /Users/sterling/Downloads/plastik/cardflow-ios
 DEVELOPER_DIR=/Applications/Xcode.app/Contents/Developer xcodebuild \
   -project Plastik.xcodeproj \
   -scheme Plastik \
