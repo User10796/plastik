@@ -16,16 +16,16 @@ The `.dmg` will appear in the `dist/` folder. Open it and drag Plastik to Applic
 
 In the [Apple Developer portal](https://developer.apple.com/account/resources/identifiers/list):
 
-1. Register **App ID**: `com.plastik.app` with CloudKit capability
-2. Register **App ID**: `com.plastik.app.widget` for the widget extension
-3. Create a **CloudKit Container**: `iCloud.com.plastik.app`
+1. Register **App ID**: `com.plastikapp.ios` with CloudKit capability
+2. Register **App ID**: `com.plastikapp.ios.widget` for the widget extension
+3. Create a **CloudKit Container**: `iCloud.com.plastikapp.ios`
 
 ### 2. Create App in App Store Connect
 
 1. Go to [appstoreconnect.apple.com](https://appstoreconnect.apple.com)
 2. Click **My Apps → + → New App**
 3. Name: **Plastik**
-4. Bundle ID: **com.plastik.app**
+4. Bundle ID: **com.plastikapp.ios**
 5. SKU: `plastik-001`
 
 ### 3. Archive & Upload
@@ -60,5 +60,5 @@ DEVELOPER_DIR=/Applications/Xcode.app/Contents/Developer xcodebuild \
 open -a Simulator
 xcrun simctl boot "iPhone 16" 2>/dev/null
 xcrun simctl install booted ~/Library/Developer/Xcode/DerivedData/Plastik-*/Build/Products/Debug-iphonesimulator/Plastik.app
-xcrun simctl launch booted com.plastik.app
+xcrun simctl launch booted com.plastikapp.ios
 ```

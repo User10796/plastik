@@ -24,6 +24,7 @@
 		361F0B96BEDB490720479EE3 /* CardBenefit.swift in Sources */ = {isa = PBXBuildFile; fileRef = 600263A0D6EA6B6B09A61641 /* CardBenefit.swift */; };
 		3DF2E2472E644E27F6C3BB03 /* StrategyView.swift in Sources */ = {isa = PBXBuildFile; fileRef = E547A6D2F49A7FB05673A43F /* StrategyView.swift */; };
 		4ED22FAE244CF3BADA393CDA /* UserCard.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9CC8A8DFFABF1324FFBFB387 /* UserCard.swift */; };
+		54F92EEEC0BD2C029F8E4531 /* plastik-data.json in Resources */ = {isa = PBXBuildFile; fileRef = BE7C4ECBC1767FD091186FC9 /* plastik-data.json */; };
 		637AA0502F023C657760FD7F /* CreditCard.swift in Sources */ = {isa = PBXBuildFile; fileRef = E7ED8835E12AEE7689EB31E2 /* CreditCard.swift */; };
 		6A90DC88E3980A6885BC42EC /* CardOffer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1F38DC8129FDE5196B6DFC33 /* CardOffer.swift */; };
 		700B5D85CA118A49CC4DDC4D /* BenefitDetailView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 56B7E349BF7ABDC33F03A1A6 /* BenefitDetailView.swift */; };
@@ -32,7 +33,6 @@
 		78EC22E2E3B0B640AFB65E6B /* StressTestHelper.swift in Sources */ = {isa = PBXBuildFile; fileRef = 24C251A05CC625A78CE18314 /* StressTestHelper.swift */; };
 		7D03987C1A6D3574B90165FA /* CardDetailView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 103F5398EA989E084ECAA187 /* CardDetailView.swift */; };
 		80C07E6FD4DB64978D94F916 /* CreditCard.swift in Sources */ = {isa = PBXBuildFile; fileRef = E7ED8835E12AEE7689EB31E2 /* CreditCard.swift */; };
-		889DCBEFE7F6CA4FAFACB4DF /* cardflow-data.json in Resources */ = {isa = PBXBuildFile; fileRef = 9C69684A83F7C2DCA2345CA4 /* cardflow-data.json */; };
 		8AF2E165AA8B7A8C8CF98E76 /* DebugTestView.swift in Sources */ = {isa = PBXBuildFile; fileRef = D055C4B323802D014309BED3 /* DebugTestView.swift */; };
 		8D7589C26577A22DD4BC4CBC /* CardListView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 00A581631BE61BD78BE7784E /* CardListView.swift */; };
 		90B961D013BCE518A904ECCD /* PlastikWidgetExtension.appex in Embed Foundation Extensions */ = {isa = PBXBuildFile; fileRef = 78D8161278A4801F1D768DDE /* PlastikWidgetExtension.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
@@ -117,12 +117,12 @@
 		93B1EA2F85DD450E9487147E /* WalletViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WalletViewModel.swift; sourceTree = "<group>"; };
 		93E2A8C77C423C50DE865530 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; path = Info.plist; sourceTree = "<group>"; };
 		96583A155EA3AAD8CB9D6F62 /* PlastikApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PlastikApp.swift; sourceTree = "<group>"; };
-		9C69684A83F7C2DCA2345CA4 /* cardflow-data.json */ = {isa = PBXFileReference; lastKnownFileType = text.json; path = "cardflow-data.json"; sourceTree = "<group>"; };
 		9CC8A8DFFABF1324FFBFB387 /* UserCard.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UserCard.swift; sourceTree = "<group>"; };
 		ADC9D0F06CA70FD770B4BDC0 /* Plastik.app */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = wrapper.application; path = Plastik.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		AF30A4D6981903B96AB05E7E /* NotificationService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NotificationService.swift; sourceTree = "<group>"; };
 		B09B2182C2BF7D1DB52F1EB2 /* IssuerRulesView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = IssuerRulesView.swift; sourceTree = "<group>"; };
 		B80654403CB66D4F800E073C /* DataFeedService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DataFeedService.swift; sourceTree = "<group>"; };
+		BE7C4ECBC1767FD091186FC9 /* plastik-data.json */ = {isa = PBXFileReference; lastKnownFileType = text.json; path = "plastik-data.json"; sourceTree = "<group>"; };
 		C874045CA58D786AB13A3A95 /* ContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentView.swift; sourceTree = "<group>"; };
 		D055C4B323802D014309BED3 /* DebugTestView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DebugTestView.swift; sourceTree = "<group>"; };
 		D19F52F07BD9A8A5EF722E2E /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; path = Info.plist; sourceTree = "<group>"; };
@@ -183,7 +183,7 @@
 		3096E1E15A141E6CB65469D8 /* Resources */ = {
 			isa = PBXGroup;
 			children = (
-				9C69684A83F7C2DCA2345CA4 /* cardflow-data.json */,
+				BE7C4ECBC1767FD091186FC9 /* plastik-data.json */,
 			);
 			path = Resources;
 			sourceTree = "<group>";
@@ -430,7 +430,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				04109E5F897B42F255B20178 /* Assets.xcassets in Resources */,
-				889DCBEFE7F6CA4FAFACB4DF /* cardflow-data.json in Resources */,
+				54F92EEEC0BD2C029F8E4531 /* plastik-data.json in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -526,7 +526,7 @@
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
-				PRODUCT_BUNDLE_IDENTIFIER = com.plastik.app;
+				PRODUCT_BUNDLE_IDENTIFIER = com.plastikapp.ios;
 				SDKROOT = iphoneos;
 				SWIFT_EMIT_LOC_STRINGS = YES;
 				TARGETED_DEVICE_FAMILY = "1,2";
@@ -543,7 +543,7 @@
 					"@executable_path/Frameworks",
 					"@executable_path/../../Frameworks",
 				);
-				PRODUCT_BUNDLE_IDENTIFIER = com.plastik.app.widget;
+				PRODUCT_BUNDLE_IDENTIFIER = com.plastikapp.ios.widget;
 				SDKROOT = iphoneos;
 				SKIP_INSTALL = YES;
 				TARGETED_DEVICE_FAMILY = "1,2";
@@ -563,7 +563,7 @@
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
-				PRODUCT_BUNDLE_IDENTIFIER = com.plastik.app;
+				PRODUCT_BUNDLE_IDENTIFIER = com.plastikapp.ios;
 				SDKROOT = iphoneos;
 				SWIFT_EMIT_LOC_STRINGS = YES;
 				TARGETED_DEVICE_FAMILY = "1,2";
@@ -709,7 +709,7 @@
 					"@executable_path/Frameworks",
 					"@executable_path/../../Frameworks",
 				);
-				PRODUCT_BUNDLE_IDENTIFIER = com.plastik.app.widget;
+				PRODUCT_BUNDLE_IDENTIFIER = com.plastikapp.ios.widget;
 				SDKROOT = iphoneos;
 				SKIP_INSTALL = YES;
 				TARGETED_DEVICE_FAMILY = "1,2";

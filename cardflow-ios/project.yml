@@ -1,6 +1,6 @@
 name: Plastik
 options:
-  bundleIdPrefix: com.plastik
+  bundleIdPrefix: com.plastikapp
   deploymentTarget:
     iOS: "17.0"
     macOS: "14.0"
@@ -23,7 +23,7 @@ targets:
       - Plastik
     settings:
       base:
-        PRODUCT_BUNDLE_IDENTIFIER: com.plastik.app
+        PRODUCT_BUNDLE_IDENTIFIER: com.plastikapp.ios
         INFOPLIST_FILE: Plastik/Info.plist
         CODE_SIGN_ENTITLEMENTS: Plastik/Plastik.entitlements
         ASSETCATALOG_COMPILER_APPICON_NAME: AppIcon
@@ -35,11 +35,11 @@ targets:
       path: Plastik/Plastik.entitlements
       properties:
         com.apple.developer.icloud-container-identifiers:
-          - iCloud.com.plastik.app
+          - iCloud.com.plastikapp.ios
         com.apple.developer.icloud-services:
           - CloudKit
         com.apple.developer.ubiquity-container-identifiers:
-          - iCloud.com.plastik.app
+          - iCloud.com.plastikapp.ios
     dependencies:
       - target: PlastikWidgetExtension
 
@@ -58,7 +58,7 @@ targets:
         buildPhase: sources
     settings:
       base:
-        PRODUCT_BUNDLE_IDENTIFIER: com.plastik.app.widget
+        PRODUCT_BUNDLE_IDENTIFIER: com.plastikapp.ios.widget
         INFOPLIST_FILE: PlastikWidget/Info.plist
         TARGETED_DEVICE_FAMILY: "1,2"
         SKIP_INSTALL: "YES"

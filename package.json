@@ -29,7 +29,7 @@
     "wait-on": "^7.2.0"
   },
   "build": {
-    "appId": "com.plastik.app",
+    "appId": "com.plastikapp.ios",
     "productName": "Plastik",
     "directories": {
       "output": "dist"

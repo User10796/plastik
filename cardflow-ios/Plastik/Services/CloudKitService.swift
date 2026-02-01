@@ -7,7 +7,7 @@ class CloudKitService {
     var lastSyncDate: Date?
     var syncError: String?
 
-    private let container = CKContainer(identifier: "iCloud.com.plastik.app")
+    private let container = CKContainer(identifier: "iCloud.com.plastikapp.ios")
     private let zoneName = "PlastikZone"
     private var zoneID: CKRecordZone.ID {
         CKRecordZone.ID(zoneName: zoneName, ownerName: CKCurrentUserDefaultName)

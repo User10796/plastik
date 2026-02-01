@@ -88,7 +88,7 @@ class DataFeedService {
         if let cached = UserDefaults.standard.data(forKey: cacheKey),
            let feed = try? decoder.decode(CardDataFeed.self, from: cached) {
             applyFeed(feed)
-        } else if let bundledURL = Bundle.main.url(forResource: "cardflow-data", withExtension: "json"),
+        } else if let bundledURL = Bundle.main.url(forResource: "plastik-data", withExtension: "json"),
                   let data = try? Data(contentsOf: bundledURL),
                   let feed = try? decoder.decode(CardDataFeed.self, from: data) {
             applyFeed(feed)
