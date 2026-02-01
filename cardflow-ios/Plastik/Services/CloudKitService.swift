@@ -1,61 +1,27 @@
 import Foundation
 
 /// iCloud Drive file-based sync service that shares data with the Electron macOS app.
-/// Both platforms read/write the same `cardflow-data.json` file in iCloud Drive at:
-/// ~/Library/Mobile Documents/com~apple~CloudDocs/Plastik/cardflow-data.json
+/// Both platforms read/write `cardflow-data.json` in the app's iCloud container:
+/// - iOS: accessed via FileManager.url(forUbiquityContainerIdentifier:)/Documents/
+/// - macOS Electron: ~/Library/Mobile Documents/iCloud~com~plastikapp~ios/Documents/
 @Observable
 class CloudKitService {
     var isSyncing = false
     var lastSyncDate: Date?
     var syncError: String?
 
-    private let iCloudFolderName = "Plastik"
+    private let containerID = "iCloud.com.plastikapp.ios"
     private let fileName = "cardflow-data.json"
-    private var metadataQuery: NSMetadataQuery?
 
     // MARK: - iCloud Drive File URL
 
-    /// Returns the iCloud Drive URL for the shared data file, or nil if iCloud Drive is unavailable.
-    private var iCloudFileURL: URL? {
-        // Use the general iCloud Drive (com~apple~CloudDocs) so both Electron and iOS
-        // can access the same file without needing a custom container.
-        guard let iCloudDocs = FileManager.default.url(forUbiquityContainerIdentifier: nil)?
-            .appendingPathComponent("Documents")
-            .deletingLastPathComponent()
-            .appendingPathComponent("com~apple~CloudDocs")
-        else {
-            // Fallback: try the ubiquity container root Documents folder
-            // On iOS, url(forUbiquityContainerIdentifier: nil) returns the default container
-            return nil
-        }
-
-        let folderURL = iCloudDocs.appendingPathComponent(iCloudFolderName)
-        let fileURL = folderURL.appendingPathComponent(fileName)
-        return fileURL
-    }
-
-    /// Direct path approach — the Electron app writes to com~apple~CloudDocs/Plastik/
-    private var iCloudFileURLDirect: URL? {
-        guard FileManager.default.url(forUbiquityContainerIdentifier: "iCloud.com.plastikapp.ios") != nil else {
-            return nil
-        }
-        return nil
-    }
-
-    /// Best-effort URL resolution for the shared iCloud Drive file
+    /// Returns the URL for cardflow-data.json inside the app's iCloud container Documents folder.
     var resolvedFileURL: URL? {
-        // Method 1: Use the default ubiquity container to find iCloud Drive root
-        if let defaultContainer = FileManager.default.url(forUbiquityContainerIdentifier: nil) {
-            // defaultContainer is typically: ~/Library/Mobile Documents/iCloud~<bundleid>/
-            // We need: ~/Library/Mobile Documents/com~apple~CloudDocs/Plastik/
-            let mobileDocuments = defaultContainer.deletingLastPathComponent()
-            let cloudDocsURL = mobileDocuments
-                .appendingPathComponent("com~apple~CloudDocs")
-                .appendingPathComponent(iCloudFolderName)
-                .appendingPathComponent(fileName)
-            return cloudDocsURL
+        guard let containerURL = FileManager.default.url(forUbiquityContainerIdentifier: containerID) else {
+            return nil
         }
-        return nil
+        let documentsURL = containerURL.appendingPathComponent("Documents")
+        return documentsURL.appendingPathComponent(fileName)
     }
 
     // MARK: - Shared Data Structure
