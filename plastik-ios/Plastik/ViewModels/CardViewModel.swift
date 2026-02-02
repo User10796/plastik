@@ -168,6 +168,8 @@ class CardViewModel {
         // Match by cardId + openDate to detect duplicates (handles UUID mismatches)
         var merged: [UserCard] = []
         var seenKeys = Set<String>()
+        var localOnlyCards: [UserCard] = []
+        var newerLocalCards: [UserCard] = []
 
         // Helper to create a unique key for deduplication
         func cardKey(_ card: UserCard) -> String {
@@ -175,26 +177,63 @@ class CardViewModel {
             return "\(card.cardId)|\(dateStr)"
         }
 
-        // Cloud cards take priority (they have the correct ckRecordID)
+        // Build lookup of cloud cards
+        var cloudCardsByKey: [String: UserCard] = [:]
+        for cloudCard in cloudCards {
+            cloudCardsByKey[cardKey(cloudCard)] = cloudCard
+        }
+
+        // Process all cards - keep the one with newer lastModified
         for cloudCard in cloudCards {
             let key = cardKey(cloudCard)
             if !seenKeys.contains(key) {
-                merged.append(cloudCard)
+                // Check if local version is newer
+                if let localCard = userCards.first(where: { cardKey($0) == key }) {
+                    if localCard.lastModified > cloudCard.lastModified {
+                        // Local is newer - use local and sync to cloud
+                        var updatedLocal = localCard
+                        updatedLocal.ckRecordID = cloudCard.ckRecordID // Keep the cloud record ID
+                        merged.append(updatedLocal)
+                        newerLocalCards.append(updatedLocal)
+                    } else {
+                        // Cloud is newer or same - use cloud
+                        merged.append(cloudCard)
+                    }
+                } else {
+                    merged.append(cloudCard)
+                }
                 seenKeys.insert(key)
             }
         }
 
-        // Add local cards that aren't in cloud
+        // Add local cards that aren't in cloud (need to push these up)
         for localCard in userCards {
             let key = cardKey(localCard)
             if !seenKeys.contains(key) {
                 merged.append(localCard)
                 seenKeys.insert(key)
+                localOnlyCards.append(localCard)
             }
         }
 
         userCards = merged
         saveToLocal()
+
+        // Push local-only cards and newer local cards to CloudKit
+        let cardsToUpload = localOnlyCards + newerLocalCards
+        if !cardsToUpload.isEmpty {
+            print("CloudKit: Uploading \(cardsToUpload.count) cards to cloud")
+            Task {
+                for card in cardsToUpload {
+                    do {
+                        try await cloudKit.saveUserCard(card)
+                        print("CloudKit: Uploaded \(card.cardId)")
+                    } catch {
+                        print("CloudKit: Failed to upload \(card.cardId): \(error)")
+                    }
+                }
+            }
+        }
     }
 }
 

@@ -112,6 +112,7 @@ class CloudKitService {
         )
         let record = CKRecord(recordType: "UserCard", recordID: recordID)
 
+        // Core fields
         record["cardId"] = card.cardId as CKRecordValue
         record["nickname"] = card.nickname as CKRecordValue?
         record["lastFour"] = card.lastFourDigits as CKRecordValue?
@@ -120,15 +121,36 @@ class CloudKitService {
         record["notes"] = card.notes as CKRecordValue?
         record["lastModified"] = card.lastModified as CKRecordValue
 
+        // Date fields
+        record["annualFeeDate"] = card.annualFeeDate as CKRecordValue?
+        record["closedDate"] = card.closedDate as CKRecordValue?
+        record["signupBonusReceivedDate"] = card.signupBonusReceivedDate as CKRecordValue?
+
+        // Churn tracking fields
+        record["productFamily"] = card.productFamily as CKRecordValue?
+        record["isBusinessCard"] = (card.isBusinessCard ? 1 : 0) as CKRecordValue
+        record["wasProductChanged"] = (card.wasProductChanged ? 1 : 0) as CKRecordValue
+        record["productChangedFrom"] = card.productChangedFrom as CKRecordValue?
+
+        // Signup bonus progress
         if let bonus = card.signupBonusProgress {
             record["bonusSpent"] = bonus.spentSoFar as CKRecordValue
             record["bonusTarget"] = bonus.targetSpend as CKRecordValue
             record["bonusDeadline"] = bonus.deadline as CKRecordValue
+            record["bonusCompleted"] = (bonus.completed ? 1 : 0) as CKRecordValue
+        }
+
+        // Benefit usage (encoded as JSON for complex array)
+        if !card.benefitUsage.isEmpty,
+           let benefitData = try? JSONEncoder().encode(card.benefitUsage),
+           let benefitString = String(data: benefitData, encoding: .utf8) {
+            record["benefitUsageJSON"] = benefitString as CKRecordValue
         }
 
         _ = try await container.privateCloudDatabase.save(record)
         lastSyncDate = Date()
         syncError = nil
+        print("CloudKit: Saved card \(card.cardId) with all fields")
     }
 
     func deleteUserCard(_ card: UserCard) async throws {
@@ -157,17 +179,29 @@ class CloudKitService {
         }
 
         let isActive = (record["isActive"] as? Int ?? 1) == 1
+        let isBusinessCard = (record["isBusinessCard"] as? Int ?? 0) == 1
+        let wasProductChanged = (record["wasProductChanged"] as? Int ?? 0) == 1
 
+        // Parse signup bonus progress
         var bonusProgress: BonusProgress?
         if let spent = record["bonusSpent"] as? Int,
            let target = record["bonusTarget"] as? Int,
            let deadline = record["bonusDeadline"] as? Date {
+            let completed = (record["bonusCompleted"] as? Int ?? 0) == 1 || spent >= target
             bonusProgress = BonusProgress(
                 spentSoFar: spent,
                 targetSpend: target,
                 deadline: deadline,
-                completed: spent >= target
+                completed: completed
             )
+        }
+
+        // Parse benefit usage from JSON
+        var benefitUsage: [BenefitUsage] = []
+        if let benefitJSON = record["benefitUsageJSON"] as? String,
+           let benefitData = benefitJSON.data(using: .utf8),
+           let decoded = try? JSONDecoder().decode([BenefitUsage].self, from: benefitData) {
+            benefitUsage = decoded
         }
 
         return UserCard(
@@ -176,9 +210,17 @@ class CloudKitService {
             nickname: record["nickname"] as? String,
             lastFourDigits: record["lastFour"] as? String,
             openDate: openDate,
+            annualFeeDate: record["annualFeeDate"] as? Date,
             signupBonusProgress: bonusProgress,
+            benefitUsage: benefitUsage,
             isActive: isActive,
             notes: record["notes"] as? String,
+            closedDate: record["closedDate"] as? Date,
+            signupBonusReceivedDate: record["signupBonusReceivedDate"] as? Date,
+            productFamily: record["productFamily"] as? String,
+            isBusinessCard: isBusinessCard,
+            wasProductChanged: wasProductChanged,
+            productChangedFrom: record["productChangedFrom"] as? String,
             ckRecordID: record.recordID.recordName,
             lastModified: record["lastModified"] as? Date ?? Date()
         )
