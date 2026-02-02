@@ -1,119 +1,108 @@
 # Plastik
 
 <p align="center">
-  <img src="public/logo.svg" alt="Plastik Logo" width="120" height="120">
+  <strong>Credit Card Rewards & Benefits Tracker</strong>
 </p>
 
 <p align="center">
-  <strong>Credit Card Benefits & Rewards Tracker</strong>
-</p>
-
-<p align="center">
-  A comprehensive tool for tracking credit card benefits, signup bonuses, spending caps, points balances, and churning strategy.
+  A native iOS and macOS app for tracking credit card rewards, signup bonuses, and churning strategy.
 </p>
 
 ---
 
 ## Features
 
-- 🃏 **Multi-Card Tracking** - Track unlimited cards with details for two players
-- 🎯 **Signup Bonus Progress** - Visual progress bars for spending thresholds
-- 📊 **Spending Cap Tracking** - Monitor category limits (e.g., 6% on groceries)
-- 💎 **Points Management** - Consolidated view of all rewards currencies
-- ✈️ **Companion Pass Tracking** - Southwest CP, Delta certificates, and more
-- 📋 **Application History** - Log applications with status and credit limits
-- 📈 **Hard Inquiry Tracking** - Optional credit report import
-- 📚 **Issuer Velocity Rules** - Built-in database for Chase 5/24, Amex rules, etc.
-- 📅 **Annual Fee Calendar** - Keep/downgrade/cancel decisions
-- 💰 **Debt Payoff Strategy** - Snowball method calculator
-- 🤖 **AI-Powered Analysis** - Claude API for statement parsing and recommendations
+- 🃏 **Card Portfolio** - Track all your credit cards with issuer details and annual fees
+- 🎯 **Signup Bonus Tracking** - Visual progress bars for meeting minimum spend requirements
+- 📊 **Best Card Recommendations** - See which card to use for each spending category
+- 💎 **Points & Miles** - Track balances across all rewards currencies
+- 🔄 **iCloud Sync** - Seamless sync between iPhone, iPad, and Mac via CloudKit
+- 📱 **iOS Widget** - Quick glance at your best card recommendations
+- 📋 **5/24 Tracking** - Monitor your Chase 5/24 status
+- 🔒 **Close/Reopen Cards** - Track closed cards and rechurn eligibility
+- 🔔 **Notifications** - Reminders for bonus deadlines and annual fee dates
+
+## Platforms
+
+| Platform | Requirements |
+|----------|--------------|
+| **iOS** | iPhone/iPad running iOS 17.0+ |
+| **macOS** | Mac running macOS 14.0+ |
 
 ## Installation
 
-### Prerequisites
+### Requirements
 
-- Node.js 18 or later
-- npm or yarn
-- macOS 10.15+ (for native app)
+- Xcode 15.0+
+- [XcodeGen](https://github.com/yonaskolb/XcodeGen) (for generating the Xcode project)
 
-### Quick Start
+### Setup
 
 ```bash
 # Clone the repository
 git clone https://github.com/User10796/plastik.git
-cd plastik
+cd Plastik/plastik-ios
 
-# Install dependencies
-npm install
+# Generate Xcode project
+xcodegen generate
 
-# Run in development mode
-npm run dev
-
-# In another terminal, start Electron
-npm run electron
+# Open in Xcode
+open Plastik.xcodeproj
 ```
 
-### Building for macOS
+### Building
 
-```bash
-# Build the native macOS app
-npm run build:mac
+**For iOS:**
+1. Select the `Plastik` scheme
+2. Choose your iOS device or simulator
+3. Press ⌘R to build and run
 
-# The .dmg file will be in the dist/ folder
+**For macOS:**
+1. Select the `PlastikMac` scheme
+2. Choose "My Mac" as the destination
+3. Press ⌘R to build and run
+
+## Project Structure
+
+```
+Plastik/
+├── plastik-ios/              # Native Swift/SwiftUI app
+│   ├── Plastik/
+│   │   ├── App/              # App entry point and main views
+│   │   ├── Models/           # Data models (CreditCard, UserCard, etc.)
+│   │   ├── Views/            # SwiftUI views organized by feature
+│   │   ├── ViewModels/       # Observable view models
+│   │   ├── Services/         # CloudKit, DataFeed, Notifications
+│   │   ├── Utilities/        # Constants, Extensions
+│   │   └── Resources/        # Assets, bundled card data
+│   ├── PlastikWidget/        # iOS Home Screen widget
+│   └── project.yml           # XcodeGen configuration
+└── README.md
 ```
 
-## Development
+## Data & Sync
 
-### Project Structure
+- **Local Storage**: Card data stored in UserDefaults with App Group sharing
+- **iCloud Sync**: CloudKit private database for cross-device sync
+- **Card Catalog**: Fetched from [plastik-data](https://user10796.github.io/plastik-data/cards.json) with bundled fallback
+- **Widget**: Shares data via App Group container
 
+## Configuration
+
+### App Group
 ```
-plastik/
-├── package.json          # Dependencies and scripts
-├── vite.config.js        # Vite build configuration
-├── index.html            # HTML entry point
-├── electron/
-│   ├── main.js          # Electron main process
-│   └── preload.js       # Storage bridge for renderer
-├── src/
-│   ├── App.jsx          # Main React component (all app code)
-│   └── main.jsx         # React entry point
-└── public/
-    └── logo.svg         # App icon
+group.com.plastikapp.ios
 ```
 
-### Scripts
+### iCloud Container
+```
+iCloud.com.plastikapp.ios
+```
 
-| Command | Description |
-|---------|-------------|
-| `npm run dev` | Start Vite dev server |
-| `npm run electron` | Start Electron (requires dev server) |
-| `npm run electron:dev` | Start both Vite and Electron |
-| `npm run build` | Build for web |
-| `npm run build:mac` | Build macOS .dmg |
-
-## API Integration
-
-Plastik uses the Anthropic Claude API for:
-
-1. **Statement Parsing** - Extract data from pasted statement text
-2. **Card Analysis** - Personalized recommendations for new cards
-3. **Credit Report Import** - Parse hard inquiry sections
-
-### Setting Up Your API Key
-
-1. Get an API key from [console.anthropic.com](https://console.anthropic.com)
-2. Click "API Not Set" in the app header
-3. Enter your API key and save
-
-The app uses Claude Sonnet for cost-effective parsing. Typical usage costs pennies per month.
-
-## Data Storage
-
-All data is stored locally:
-- **Web mode**: Browser's persistent storage API
-- **Desktop mode**: Electron's user data folder
-
-Data is not synced to the cloud. Your API key is stored securely on your device.
+### Bundle IDs
+- iOS App: `com.plastikapp.ios`
+- macOS App: `com.plastikapp.ios`
+- Widget: `com.plastikapp.ios.widget`
 
 ## License
 
