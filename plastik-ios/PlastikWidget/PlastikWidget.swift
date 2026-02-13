@@ -42,9 +42,9 @@ struct CardProvider: TimelineProvider {
         CardEntry(
             date: .now,
             categoryCards: [
-                CategoryCard(id: "1", category: .dining, cardName: "Sapphire Preferred", issuer: "Chase", multiplier: 3.0),
-                CategoryCard(id: "2", category: .groceries, cardName: "Gold Card", issuer: "Amex", multiplier: 4.0),
-                CategoryCard(id: "3", category: .gas, cardName: "Freedom Flex", issuer: "Chase", multiplier: 3.0)
+                CategoryCard(id: "1", category: .dining, cardName: "Sapphire Preferred", issuer: "Chase", multiplier: 3.0, nickname: nil, cardIconColor: nil),
+                CategoryCard(id: "2", category: .groceries, cardName: "Gold Card", issuer: "Amex", multiplier: 4.0, nickname: nil, cardIconColor: nil),
+                CategoryCard(id: "3", category: .gas, cardName: "Freedom Flex", issuer: "Chase", multiplier: 3.0, nickname: nil, cardIconColor: nil)
             ],
             bonusProgress: []
         )
