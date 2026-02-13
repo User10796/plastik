@@ -44,6 +44,8 @@ struct StrategyView: View {
             considerActionSection
             rechurnOpportunitiesSection
         }
+        .frame(maxWidth: 1200)
+        .frame(maxWidth: .infinity)
         .navigationTitle("Keep or Cancel")
         .navigationDestination(for: String.self) { analysisId in
             if let analysis = analyses.first(where: { $0.id == analysisId }) {
@@ -248,7 +250,9 @@ struct RetentionDetailView: View {
             rechurnSection
         }
         .navigationTitle(analysis.card.name)
+        #if os(iOS)
         .navigationBarTitleDisplayMode(.inline)
+        #endif
     }
 
     @ViewBuilder

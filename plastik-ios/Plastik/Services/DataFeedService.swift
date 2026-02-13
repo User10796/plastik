@@ -87,32 +87,48 @@ class DataFeedService {
             throw DataFeedError.decodingError(error.localizedDescription)
         }
 
-        // Save to both standard and shared defaults for widget access
-        UserDefaults.standard.set(data, forKey: Constants.feedCacheKey)
-        sharedDefaults?.set(data, forKey: Constants.feedCacheKey)
+        // Only apply remote data if it has MORE cards than current data
+        // This prevents remote URL from overwriting richer bundled data
+        let currentCardCount = await MainActor.run { self.cards.count }
+        if feed.cards.count >= currentCardCount {
+            // Save to both standard and shared defaults for widget access
+            UserDefaults.standard.set(data, forKey: Constants.feedCacheKey)
+            sharedDefaults?.set(data, forKey: Constants.feedCacheKey)
 
-        await MainActor.run {
-            applyFeed(feed)
+            await MainActor.run {
+                applyFeed(feed)
+                print("🌐 Applied remote feed: \(feed.cards.count) cards (v\(feed.version))")
+            }
+
+            // Trigger widget refresh
+            WidgetCenter.shared.reloadAllTimelines()
+        } else {
+            print("⏭️ Skipped remote feed (\(feed.cards.count) cards) - current data has more (\(currentCardCount) cards)")
         }
-
-        // Trigger widget refresh
-        WidgetCenter.shared.reloadAllTimelines()
     }
 
     func loadCachedOrBundled() {
-        // Use standard defaults as primary (always available)
-        let cachedData = UserDefaults.standard.data(forKey: Constants.feedCacheKey)
+        // Always load from bundled JSON first (ensures latest data during development)
+        if let bundledURL = Bundle.main.url(forResource: "plastik-data", withExtension: "json"),
+           let data = try? Data(contentsOf: bundledURL) {
+            do {
+                let feed = try decoder.decode(CardDataFeed.self, from: data)
+                applyFeed(feed)
+                // Update caches
+                UserDefaults.standard.set(data, forKey: Constants.feedCacheKey)
+                sharedDefaults?.set(data, forKey: Constants.feedCacheKey)
+                print("✅ Loaded \(feed.cards.count) cards from bundled JSON (v\(feed.version))")
+                return
+            } catch {
+                print("❌ Failed to decode bundled JSON: \(error)")
+            }
+        }
 
-        if let cached = cachedData,
-           let feed = try? decoder.decode(CardDataFeed.self, from: cached) {
+        // Fallback to cached data if bundled fails
+        if let cachedData = UserDefaults.standard.data(forKey: Constants.feedCacheKey),
+           let feed = try? decoder.decode(CardDataFeed.self, from: cachedData) {
             applyFeed(feed)
-        } else if let bundledURL = Bundle.main.url(forResource: "plastik-data", withExtension: "json"),
-                  let data = try? Data(contentsOf: bundledURL),
-                  let feed = try? decoder.decode(CardDataFeed.self, from: data) {
-            applyFeed(feed)
-            // Save bundled data to caches
-            UserDefaults.standard.set(data, forKey: Constants.feedCacheKey)
-            sharedDefaults?.set(data, forKey: Constants.feedCacheKey)
+            print("📦 Loaded \(feed.cards.count) cards from cache")
         }
     }
 

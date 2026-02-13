@@ -36,6 +36,8 @@ struct OptimalCardView: View {
                 }
             }
         }
+        .frame(maxWidth: 1200)
+        .frame(maxWidth: .infinity)
         .navigationTitle("Optimal Cards")
     }
 }

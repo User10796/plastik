@@ -16,6 +16,8 @@ struct WalletView: View {
             }
             .padding()
         }
+        .frame(maxWidth: 1200)
+        .frame(maxWidth: .infinity)
         .navigationTitle("Wallet")
         .sheet(isPresented: $showSpendEntry) {
             QuickSpendEntryView()
@@ -93,7 +95,9 @@ struct WalletView: View {
                     .padding(.horizontal, 4)
                 }
             }
+            #if os(iOS)
             .tabViewStyle(.page(indexDisplayMode: topCards.count > 1 ? .automatic : .never))
+            #endif
             .frame(height: 220)
         }
     }
@@ -162,6 +166,11 @@ struct CarouselCardView: View {
     let rate: Double
     let category: SpendCategory
     let rank: Int
+
+    /// Returns the effective annual fee (user override or catalog value)
+    private var effectiveAnnualFee: Int {
+        userCard.annualFeeOverride ?? card.annualFee
+    }
 
     var body: some View {
         VStack(spacing: 0) {
@@ -235,8 +244,8 @@ struct CarouselCardView: View {
                     }
                 }
                 Spacer()
-                if card.annualFee > 0 {
-                    Text(card.annualFee.currencyFormatted + "/yr")
+                if effectiveAnnualFee > 0 {
+                    Text(effectiveAnnualFee.currencyFormatted + "/yr")
                         .font(.caption)
                         .foregroundStyle(.secondary)
                 } else {
@@ -490,6 +499,7 @@ struct QuickSpendEntryView: View {
 
 private func issuerGradientStart(_ issuer: Issuer) -> Color {
     switch issuer {
+    // Tier 1: Major Issuers
     case .chase: return .blue
     case .amex: return .indigo
     case .citi: return .cyan
@@ -499,11 +509,31 @@ private func issuerGradientStart(_ issuer: Issuer) -> Color {
     case .wellsFargo: return .yellow
     case .bankOfAmerica: return .red
     case .discover: return .orange
+    // Tier 2: Mid-Market & Specialty Issuers
+    case .usaa: return .blue
+    case .navyFederal: return .blue
+    case .pnc: return .orange
+    case .tdBank: return .green
+    case .synchrony: return .blue
+    case .breadFinancial: return .orange
+    case .goldmanSachs: return .blue
+    case .fnbo: return .blue
+    case .creditOne: return .blue
+    case .upgrade: return .teal
+    case .avant: return .green
+    // Tier 3: Tech & Fintech Issuers
+    case .apple: return .gray
+    case .brex: return .orange
+    case .ramp: return .yellow
+    case .mercury: return .indigo
+    // Special
+    case .custom: return .gray
     }
 }
 
 private func issuerGradientEnd(_ issuer: Issuer) -> Color {
     switch issuer {
+    // Tier 1: Major Issuers
     case .chase: return .blue.opacity(0.6)
     case .amex: return .purple
     case .citi: return .blue
@@ -513,5 +543,24 @@ private func issuerGradientEnd(_ issuer: Issuer) -> Color {
     case .wellsFargo: return .red
     case .bankOfAmerica: return .pink
     case .discover: return .yellow
+    // Tier 2: Mid-Market & Specialty Issuers
+    case .usaa: return .blue.opacity(0.6)
+    case .navyFederal: return .blue.opacity(0.6)
+    case .pnc: return .orange.opacity(0.6)
+    case .tdBank: return .green.opacity(0.6)
+    case .synchrony: return .blue.opacity(0.6)
+    case .breadFinancial: return .orange.opacity(0.6)
+    case .goldmanSachs: return .cyan
+    case .fnbo: return .blue.opacity(0.6)
+    case .creditOne: return .blue.opacity(0.6)
+    case .upgrade: return .cyan
+    case .avant: return .green.opacity(0.6)
+    // Tier 3: Tech & Fintech Issuers
+    case .apple: return .gray.opacity(0.6)
+    case .brex: return .red
+    case .ramp: return .orange
+    case .mercury: return .purple
+    // Special
+    case .custom: return .gray.opacity(0.6)
     }
 }

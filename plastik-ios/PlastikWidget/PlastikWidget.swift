@@ -6,18 +6,24 @@ import AppIntents
 
 struct CardEntry: TimelineEntry {
     let date: Date
-    let bestCard: WidgetCard?
-    let topCards: [WidgetCard]
+    let categoryCards: [CategoryCard]  // Best card for each category
     let bonusProgress: [WidgetBonus]
-    let category: SpendCategory
 }
 
-struct WidgetCard: Identifiable {
+struct CategoryCard: Identifiable {
     let id: String
-    let name: String
+    let category: SpendCategory
+    let cardName: String
     let issuer: String
     let multiplier: Double
-    let network: String
+
+    var displayName: String {
+        // Shorten card names for widget display
+        cardName
+            .replacingOccurrences(of: "Preferred", with: "Pref")
+            .replacingOccurrences(of: "Reserve", with: "Res")
+            .replacingOccurrences(of: "Business", with: "Biz")
+    }
 }
 
 struct WidgetBonus {
@@ -28,62 +34,35 @@ struct WidgetBonus {
     let daysRemaining: Int
 }
 
-// MARK: - Category Intent
-
-struct SelectCategoryIntent: WidgetConfigurationIntent {
-    static var title: LocalizedStringResource = "Select Category"
-    static var description = IntentDescription("Choose a spending category to see the best card.")
-
-    @Parameter(title: "Category", default: .dining)
-    var category: SpendCategory
-}
-
-extension SpendCategory: AppEnum {
-    static var typeDisplayRepresentation = TypeDisplayRepresentation(name: "Spend Category")
-
-    static var caseDisplayRepresentations: [SpendCategory: DisplayRepresentation] {
-        [
-            .dining: "Dining",
-            .travel: "Travel",
-            .groceries: "Groceries",
-            .gas: "Gas",
-            .streaming: "Streaming",
-            .drugstores: "Drugstores",
-            .homeImprovement: "Home Improvement",
-            .online: "Online Shopping",
-            .entertainment: "Entertainment",
-            .utilities: "Utilities",
-            .other: "Other"
-        ]
-    }
-}
-
 // MARK: - Timeline Provider
 
-struct CardProvider: AppIntentTimelineProvider {
+struct CardProvider: TimelineProvider {
     typealias Entry = CardEntry
-    typealias Intent = SelectCategoryIntent
 
     func placeholder(in context: Context) -> CardEntry {
         CardEntry(
             date: .now,
-            bestCard: WidgetCard(id: "placeholder", name: "Sapphire Preferred", issuer: "Chase", multiplier: 3.0, network: "Visa"),
-            topCards: [],
-            bonusProgress: [],
-            category: .dining
+            categoryCards: [
+                CategoryCard(id: "1", category: .dining, cardName: "Sapphire Preferred", issuer: "Chase", multiplier: 3.0),
+                CategoryCard(id: "2", category: .groceries, cardName: "Gold Card", issuer: "Amex", multiplier: 4.0),
+                CategoryCard(id: "3", category: .gas, cardName: "Freedom Flex", issuer: "Chase", multiplier: 3.0)
+            ],
+            bonusProgress: []
         )
     }
 
-    func snapshot(for configuration: SelectCategoryIntent, in context: Context) async -> CardEntry {
-        await fetchEntry(for: configuration.category)
+    func getSnapshot(in context: Context, completion: @escaping (CardEntry) -> Void) {
+        let entry = fetchEntry()
+        completion(entry)
     }
 
-    func timeline(for configuration: SelectCategoryIntent, in context: Context) async -> Timeline<CardEntry> {
-        let entry = await fetchEntry(for: configuration.category)
-        return Timeline(entries: [entry], policy: .after(.now.addingTimeInterval(3600)))
+    func getTimeline(in context: Context, completion: @escaping (Timeline<CardEntry>) -> Void) {
+        let entry = fetchEntry()
+        let timeline = Timeline(entries: [entry], policy: .after(.now.addingTimeInterval(3600)))
+        completion(timeline)
     }
 
-    private func fetchEntry(for category: SpendCategory) async -> CardEntry {
+    private func fetchEntry() -> CardEntry {
         let decoder = JSONDecoder()
         decoder.dateDecodingStrategy = .iso8601
 
@@ -112,24 +91,54 @@ struct CardProvider: AppIntentTimelineProvider {
             userCards = decoded
         }
 
-        // Find best cards for category among user's cards
-        let userCardIds = Set(userCards.map(\.cardId))
-        let userCatalog = cards.filter { userCardIds.contains($0.id) }
+        // Filter to only user's active cards
+        let activeUserCards = userCards.filter { $0.closedDate == nil }
+        let activeUserCardIds = Set(activeUserCards.map(\.cardId))
+        let userCatalog = cards.filter { activeUserCardIds.contains($0.id) }
 
-        let sorted = userCatalog.sorted { a, b in
-            let aRate = a.earningRates.first { $0.category == category }?.multiplier ?? 1.0
-            let bRate = b.earningRates.first { $0.category == category }?.multiplier ?? 1.0
-            return aRate > bRate
-        }
+        // Build a lookup of user cards by cardId for override checks
+        let userCardsByCardId: [String: UserCard] = Dictionary(
+            activeUserCards.map { ($0.cardId, $0) },
+            uniquingKeysWith: { first, _ in first }
+        )
 
-        let best = sorted.first.map { card in
-            let rate = card.earningRates.first { $0.category == category }?.multiplier ?? 1.0
-            return WidgetCard(id: card.id, name: card.name, issuer: card.issuer.displayName, multiplier: rate, network: card.network.displayName)
-        }
+        // Find best card for each category
+        let categories: [SpendCategory] = [.dining, .groceries, .gas, .travel, .streaming, .online]
+        var categoryCards: [CategoryCard] = []
 
-        let top3 = Array(sorted.prefix(3)).map { card in
-            let rate = card.earningRates.first { $0.category == category }?.multiplier ?? 1.0
-            return WidgetCard(id: card.id, name: card.name, issuer: card.issuer.displayName, multiplier: rate, network: card.network.displayName)
+        for category in categories {
+            // Find card with highest multiplier for this category
+            // Check user overrides first, then fall back to catalog
+            let bestCard = userCatalog
+                .compactMap { card -> (CreditCard, Double)? in
+                    let userCard = userCardsByCardId[card.id]
+
+                    // Check user-overridden reward categories first
+                    if let overrides = userCard?.rewardCategoriesOverride,
+                       let override = overrides.first(where: {
+                           $0.categoryName.lowercased() == category.displayName.lowercased()
+                       }) {
+                        return (card, override.rewardRate)
+                    }
+
+                    // Fall back to catalog earning rates
+                    guard let rate = card.earningRates.first(where: { $0.category == category }) else {
+                        return nil
+                    }
+                    return (card, rate.multiplier)
+                }
+                .sorted { $0.1 > $1.1 }
+                .first
+
+            if let (card, multiplier) = bestCard, multiplier > 1.0 {
+                categoryCards.append(CategoryCard(
+                    id: "\(category.rawValue)-\(card.id)",
+                    category: category,
+                    cardName: card.name,
+                    issuer: card.issuer.displayName,
+                    multiplier: multiplier
+                ))
+            }
         }
 
         // Bonus progress
@@ -147,10 +156,8 @@ struct CardProvider: AppIntentTimelineProvider {
 
         return CardEntry(
             date: .now,
-            bestCard: best,
-            topCards: top3,
-            bonusProgress: bonuses,
-            category: category
+            categoryCards: categoryCards,
+            bonusProgress: bonuses
         )
     }
 }
@@ -161,16 +168,16 @@ struct PlastikWidget: Widget {
     let kind: String = "PlastikWidget"
 
     var body: some WidgetConfiguration {
-        AppIntentConfiguration(
+        StaticConfiguration(
             kind: kind,
-            intent: SelectCategoryIntent.self,
             provider: CardProvider()
         ) { entry in
             PlastikWidgetEntryView(entry: entry)
         }
-        .configurationDisplayName("Best Card")
-        .description("Shows the best card for your selected category")
+        .configurationDisplayName("Best Cards")
+        .description("Shows the best card for each spending category")
         .supportedFamilies([.systemSmall, .systemMedium, .systemLarge, .accessoryCircular])
+        .contentMarginsDisabled()  // Remove system margins for more space
     }
 }
 

@@ -50,6 +50,8 @@ struct OffersView: View {
             }
         }
         .searchable(text: $searchText, prompt: "Search offers")
+        .frame(maxWidth: 1200)
+        .frame(maxWidth: .infinity)
         .navigationTitle("Offers")
         .navigationDestination(for: String.self) { offerId in
             if let offer = feedService.offers.first(where: { $0.id == offerId }) {
@@ -98,14 +100,23 @@ struct FilterChip: View {
     let isSelected: Bool
     let action: () -> Void
 
+    private var pillBackground: Color {
+        #if os(iOS)
+        return Color(.tertiarySystemBackground)
+        #else
+        return Color(nsColor: .controlBackgroundColor)
+        #endif
+    }
+
     var body: some View {
         Button(action: action) {
             Text(label)
-                .font(.caption)
-                .padding(.horizontal, 10)
-                .padding(.vertical, 6)
-                .background(isSelected ? AnyShapeStyle(.blue) : AnyShapeStyle(.ultraThinMaterial))
-                .foregroundStyle(isSelected ? .white : .primary)
+                .font(.system(size: 14, weight: .medium)) // Section 5: Minimum 14px
+                .padding(.horizontal, 12) // Section 5: 8px+ horizontal
+                .padding(.vertical, 12) // iOS: Increased for 44px touch target
+                .frame(minHeight: 44) // iOS accessibility: 44px minimum touch target
+                .background(isSelected ? Color.accentColor : pillBackground)
+                .foregroundStyle(isSelected ? Color.white : Color.primary)
                 .clipShape(Capsule())
         }
         .buttonStyle(.plain)

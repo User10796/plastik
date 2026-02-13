@@ -157,93 +157,105 @@ enum SidebarItem: String, CaseIterable, Hashable {
 }
 
 struct MacContentView: View {
-    @Environment(CardViewModel.self) private var cardViewModel
-    @Environment(DataFeedService.self) private var feedService
-
     @State private var selectedItem: SidebarItem? = .dashboard
-    @State private var selectedCard: UserCard?
 
     var body: some View {
         NavigationSplitView {
-            // SIDEBAR with grouped sections
+            // SIDEBAR with grouped sections - uses NSVisualEffectView automatically
             List(selection: $selectedItem) {
                 // Dashboard (top level, no group)
-                NavigationLink(value: SidebarItem.dashboard) {
-                    Label("Dashboard", systemImage: "square.grid.2x2")
-                }
+                Label("Dashboard", systemImage: "square.grid.2x2")
+                    .font(.system(size: 14))
+                    .tag(SidebarItem.dashboard)
 
                 // Wallet Group
-                Section("Wallet") {
-                    NavigationLink(value: SidebarItem.cards) {
-                        Label("Cards", systemImage: "creditcard.fill")
-                    }
-                    NavigationLink(value: SidebarItem.points) {
-                        Label("Points", systemImage: "star.fill")
-                    }
-                    NavigationLink(value: SidebarItem.companionPasses) {
-                        Label("Companion Passes", systemImage: "person.2.fill")
-                    }
+                Section {
+                    Label("Cards", systemImage: "creditcard.fill")
+                        .font(.system(size: 14))
+                        .tag(SidebarItem.cards)
+                    Label("Points", systemImage: "star.fill")
+                        .font(.system(size: 14))
+                        .tag(SidebarItem.points)
+                    Label("Companion Passes", systemImage: "person.2.fill")
+                        .font(.system(size: 14))
+                        .tag(SidebarItem.companionPasses)
+                } header: {
+                    Text("WALLET")
+                        .font(.system(size: 12, weight: .medium))
+                        .foregroundStyle(.secondary)
+                        .textCase(.uppercase)
                 }
 
                 // Strategy Group
-                Section("Strategy") {
-                    NavigationLink(value: SidebarItem.recommendations) {
-                        Label("Recommendations", systemImage: "lightbulb.fill")
-                    }
-                    NavigationLink(value: SidebarItem.transferPartners) {
-                        Label("Transfer Partners", systemImage: "arrow.triangle.swap")
-                    }
-                    NavigationLink(value: SidebarItem.churnTracker) {
-                        Label("Churn Tracker", systemImage: "chart.bar.fill")
-                    }
+                Section {
+                    Label("Recommendations", systemImage: "lightbulb.fill")
+                        .font(.system(size: 14))
+                        .tag(SidebarItem.recommendations)
+                    Label("Transfer Partners", systemImage: "arrow.triangle.swap")
+                        .font(.system(size: 14))
+                        .tag(SidebarItem.transferPartners)
+                    Label("Churn Tracker", systemImage: "chart.bar.fill")
+                        .font(.system(size: 14))
+                        .tag(SidebarItem.churnTracker)
+                } header: {
+                    Text("STRATEGY")
+                        .font(.system(size: 12, weight: .medium))
+                        .foregroundStyle(.secondary)
+                        .textCase(.uppercase)
                 }
 
                 // Tools Group
-                Section("Tools") {
-                    NavigationLink(value: SidebarItem.importData) {
-                        Label("Import", systemImage: "square.and.arrow.down")
-                    }
-                    NavigationLink(value: SidebarItem.payoffCalculator) {
-                        Label("Payoff Calculator", systemImage: "function")
-                    }
+                Section {
+                    Label("Import", systemImage: "square.and.arrow.down")
+                        .font(.system(size: 14))
+                        .tag(SidebarItem.importData)
+                    Label("Payoff Calculator", systemImage: "function")
+                        .font(.system(size: 14))
+                        .tag(SidebarItem.payoffCalculator)
+                } header: {
+                    Text("TOOLS")
+                        .font(.system(size: 12, weight: .medium))
+                        .foregroundStyle(.secondary)
+                        .textCase(.uppercase)
                 }
 
                 // History Group
-                Section("History") {
-                    NavigationLink(value: SidebarItem.applications) {
-                        Label("Applications", systemImage: "doc.text")
-                    }
-                    NavigationLink(value: SidebarItem.creditPulls) {
-                        Label("Credit Pulls", systemImage: "magnifyingglass")
-                    }
+                Section {
+                    Label("Applications", systemImage: "doc.text")
+                        .font(.system(size: 14))
+                        .tag(SidebarItem.applications)
+                    Label("Credit Pulls", systemImage: "magnifyingglass")
+                        .font(.system(size: 14))
+                        .tag(SidebarItem.creditPulls)
+                } header: {
+                    Text("HISTORY")
+                        .font(.system(size: 12, weight: .medium))
+                        .foregroundStyle(.secondary)
+                        .textCase(.uppercase)
                 }
 
-                // Settings (bottom, with divider)
-                Divider()
-                NavigationLink(value: SidebarItem.settings) {
+                // Settings (bottom, separated)
+                Section {
                     Label("Settings", systemImage: "gear")
+                        .font(.system(size: 14))
+                        .tag(SidebarItem.settings)
                 }
             }
             .navigationSplitViewColumnWidth(min: 200, ideal: 220, max: 280)
-            .navigationTitle("Plastik")
-
-        } content: {
-            // CONTENT area
-            contentView
+            .listStyle(.sidebar)
+            .scrollContentBackground(.hidden)
+            .background(VisualEffectBackground())
 
         } detail: {
-            // DETAIL VIEW (for card selection etc.)
-            if let card = selectedCard {
-                CardDetailView(userCard: card)
-            } else {
-                ContentUnavailableView(
-                    "No Selection",
-                    systemImage: "creditcard",
-                    description: Text("Select a card to view details")
-                )
+            // DETAIL area - content based on sidebar selection
+            NavigationStack {
+                contentView
             }
         }
-        .navigationSplitViewStyle(.balanced)
+        .navigationTitle("Plastik")
+        #if os(macOS)
+        .frame(minWidth: 900, minHeight: 600)
+        #endif
     }
 
     @ViewBuilder
@@ -282,3 +294,27 @@ struct MacContentView: View {
         }
     }
 }
+
+// MARK: - Visual Effect Background for Translucent Sidebar
+
+#if os(macOS)
+struct VisualEffectBackground: NSViewRepresentable {
+    func makeNSView(context: Context) -> NSVisualEffectView {
+        let view = NSVisualEffectView()
+        view.material = .sidebar
+        view.blendingMode = .behindWindow
+        view.state = .followsWindowActiveState
+        return view
+    }
+
+    func updateNSView(_ nsView: NSVisualEffectView, context: Context) {
+        nsView.material = .sidebar
+    }
+}
+#else
+struct VisualEffectBackground: View {
+    var body: some View {
+        Color.clear
+    }
+}
+#endif

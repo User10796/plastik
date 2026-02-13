@@ -20,6 +20,8 @@ struct ChurnTrackerView: View {
             issuerRulesSection
             toolsSection
         }
+        .frame(maxWidth: 1200)
+        .frame(maxWidth: .infinity)
         .navigationTitle("Churn Tracker")
         .navigationDestination(for: String.self) { destination in
             if destination == "transfer-partners" {

@@ -88,6 +88,8 @@ struct ApplicationsView: View {
                 )
             }
         }
+        .frame(maxWidth: 1200)
+        .frame(maxWidth: .infinity)
         .navigationTitle("Applications")
         .toolbar {
             ToolbarItem(placement: .primaryAction) {

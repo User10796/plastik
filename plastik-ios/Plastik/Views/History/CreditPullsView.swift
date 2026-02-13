@@ -84,6 +84,8 @@ struct CreditPullsView: View {
                 IssuerPullRow(issuer: "Barclays", bureaus: "TransUnion")
             }
         }
+        .frame(maxWidth: 1200)
+        .frame(maxWidth: .infinity)
         .navigationTitle("Credit Pulls")
     }
 
@@ -137,6 +139,7 @@ struct CreditPullsView: View {
 
     private func estimatedBureau(for issuer: Issuer) -> String {
         switch issuer {
+        // Tier 1: Major Issuers
         case .chase: return "Experian"
         case .amex: return "Experian"
         case .citi: return "Experian, Equifax"
@@ -146,6 +149,25 @@ struct CreditPullsView: View {
         case .wellsFargo: return "Experian"
         case .bankOfAmerica: return "Experian, TransUnion"
         case .discover: return "TransUnion, Experian"
+        // Tier 2: Mid-Market & Specialty Issuers
+        case .usaa: return "Experian, Equifax"
+        case .navyFederal: return "TransUnion, Equifax"
+        case .pnc: return "Experian, Equifax"
+        case .tdBank: return "TransUnion, Experian"
+        case .synchrony: return "TransUnion"
+        case .breadFinancial: return "TransUnion"
+        case .goldmanSachs: return "TransUnion"
+        case .fnbo: return "TransUnion, Experian"
+        case .creditOne: return "TransUnion, Experian"
+        case .upgrade: return "TransUnion, Experian"
+        case .avant: return "TransUnion"
+        // Tier 3: Tech & Fintech Issuers
+        case .apple: return "TransUnion"
+        case .brex: return "Experian"
+        case .ramp: return "Experian"
+        case .mercury: return "Experian"
+        // Special
+        case .custom: return "Unknown"
         }
     }
 }

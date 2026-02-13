@@ -17,6 +17,8 @@ struct SettingsView: View {
             #endif
             aboutSection
         }
+        .frame(maxWidth: 1200)
+        .frame(maxWidth: .infinity)
         .navigationTitle("Settings")
     }
 

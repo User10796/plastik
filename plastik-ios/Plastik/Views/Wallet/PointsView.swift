@@ -49,6 +49,8 @@ struct PointsView: View {
                 }
             }
         }
+        .frame(maxWidth: 1200)
+        .frame(maxWidth: .infinity)
         .navigationTitle("Points")
     }
 

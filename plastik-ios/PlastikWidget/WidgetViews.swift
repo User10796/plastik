@@ -17,140 +17,190 @@ struct PlastikWidgetEntryView: View {
             LargeWidgetView(entry: entry)
         case .accessoryCircular:
             CircularWidgetView(entry: entry)
+        case .accessoryRectangular:
+            RectangularWidgetView(entry: entry)
         default:
             SmallWidgetView(entry: entry)
         }
     }
 }
 
-// MARK: - Small Widget (Best Card for Category)
+// MARK: - Small Widget (Top 2 Categories with Mini Cards)
 
 struct SmallWidgetView: View {
     let entry: CardEntry
 
     var body: some View {
         VStack(alignment: .leading, spacing: 6) {
-            HStack {
-                Image(systemName: entry.category.icon)
-                    .font(.caption)
-                    .foregroundStyle(.blue)
-                Text(entry.category.displayName)
+            // Header
+            HStack(spacing: 4) {
+                Image(systemName: "creditcard.fill")
                     .font(.caption2)
-                    .foregroundStyle(.secondary)
+                    .foregroundStyle(.blue)
+                Text("Best Cards")
+                    .font(.system(size: 11, weight: .semibold))
             }
+            .foregroundStyle(.secondary)
 
-            if let card = entry.bestCard {
-                Text(card.name)
-                    .font(.headline)
-                    .lineLimit(2)
-                    .minimumScaleFactor(0.8)
-
-                Spacer()
-
-                HStack {
-                    Text(card.multiplier.multiplierString)
-                        .font(.title.bold())
-                        .foregroundStyle(.blue)
-                    Spacer()
-                    Text(card.issuer)
-                        .font(.caption2)
-                        .foregroundStyle(.secondary)
-                }
-            } else {
-                Text("No cards")
-                    .font(.subheadline)
-                    .foregroundStyle(.secondary)
+            if entry.categoryCards.isEmpty {
                 Spacer()
                 Text("Add cards in Plastik")
                     .font(.caption2)
                     .foregroundStyle(.tertiary)
+                    .frame(maxWidth: .infinity, alignment: .center)
+                Spacer()
+            } else {
+                VStack(spacing: 8) {
+                    ForEach(entry.categoryCards.prefix(2)) { item in
+                        SmallCategoryRow(item: item)
+                    }
+                }
+                Spacer(minLength: 0)
             }
         }
-        .padding()
+        .padding(8)
         .containerBackground(.fill.tertiary, for: .widget)
     }
 }
 
-// MARK: - Medium Widget (Top 3 Cards)
+struct SmallCategoryRow: View {
+    let item: CategoryCard
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 2) {
+            // Category name
+            HStack(spacing: 3) {
+                Image(systemName: item.category.icon)
+                    .font(.system(size: 9))
+                    .foregroundStyle(.blue)
+                Text(item.category.displayName)
+                    .font(.system(size: 9))
+                    .foregroundStyle(.secondary)
+            }
+
+            // Card with mini icon
+            HStack(spacing: 4) {
+                WidgetMiniCard(issuer: item.issuer, size: 20)
+
+                Text(item.cardShortName)
+                    .font(.system(size: 11, weight: .medium))
+                    .lineLimit(1)
+                    .minimumScaleFactor(0.8)
+
+                Spacer()
+
+                Text(item.multiplier.multiplierString)
+                    .font(.system(size: 12, weight: .bold, design: .rounded))
+                    .foregroundStyle(.blue)
+            }
+        }
+    }
+}
+
+// MARK: - Medium Widget (Vertical Category List)
 
 struct MediumWidgetView: View {
     let entry: CardEntry
 
     var body: some View {
-        VStack(alignment: .leading, spacing: 8) {
+        VStack(alignment: .leading, spacing: 6) {
+            // Header
             HStack {
-                Image(systemName: entry.category.icon)
+                Image(systemName: "creditcard.fill")
+                    .font(.system(size: 12))
                     .foregroundStyle(.blue)
-                Text("Top Cards for \(entry.category.displayName)")
-                    .font(.caption.bold())
+                Text("Best Cards by Category")
+                    .font(.system(size: 12, weight: .semibold))
                 Spacer()
             }
 
-            if entry.topCards.isEmpty {
+            if entry.categoryCards.isEmpty {
                 Text("Add cards in Plastik to see recommendations")
-                    .font(.caption)
+                    .font(.caption2)
                     .foregroundStyle(.secondary)
+                    .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .center)
             } else {
-                ForEach(Array(entry.topCards.enumerated()), id: \.element.id) { index, card in
-                    HStack {
-                        Text("\(index + 1)")
-                            .font(.caption2.bold())
-                            .foregroundStyle(.secondary)
-                            .frame(width: 16)
-                        Text(card.name)
-                            .font(.caption)
-                            .lineLimit(1)
-                        Spacer()
-                        Text(card.multiplier.multiplierString)
-                            .font(.caption.bold())
-                            .foregroundStyle(.blue)
+                // Vertical list - one category per row
+                VStack(spacing: 4) {
+                    ForEach(entry.categoryCards.prefix(4)) { item in
+                        MediumCategoryRow(item: item)
                     }
                 }
+                Spacer(minLength: 0)
             }
         }
-        .padding()
+        .padding(10)
         .containerBackground(.fill.tertiary, for: .widget)
     }
 }
 
-// MARK: - Large Widget (Dashboard)
+struct MediumCategoryRow: View {
+    let item: CategoryCard
+
+    var body: some View {
+        HStack(spacing: 6) {
+            // Category icon
+            Image(systemName: item.category.icon)
+                .font(.system(size: 10))
+                .foregroundStyle(.blue)
+                .frame(width: 12)
+
+            // Category name
+            Text(item.category.shortName)
+                .font(.system(size: 10, weight: .medium))
+                .foregroundStyle(.secondary)
+                .frame(width: 44, alignment: .leading)
+
+            // Mini card icon
+            WidgetMiniCard(issuer: item.issuer, size: 20)
+
+            // Full card name
+            Text(item.cardShortName)
+                .font(.system(size: 11, weight: .medium))
+                .lineLimit(1)
+                .minimumScaleFactor(0.8)
+
+            Spacer()
+
+            // Multiplier
+            Text(item.multiplier.multiplierString)
+                .font(.system(size: 12, weight: .bold, design: .rounded))
+                .foregroundStyle(item.multiplier >= 3 ? .blue : .primary)
+        }
+    }
+}
+
+// MARK: - Large Widget (Full Dashboard with Mini Cards)
 
 struct LargeWidgetView: View {
     let entry: CardEntry
 
-    private let dashboardCategories: [SpendCategory] = [.dining, .travel, .groceries, .gas]
-
     var body: some View {
-        VStack(alignment: .leading, spacing: 10) {
-            Text("Plastik")
-                .font(.headline.bold())
+        VStack(alignment: .leading, spacing: 8) {
+            // Header
+            HStack {
+                Text("Plastik")
+                    .font(.system(size: 15, weight: .bold))
+                Spacer()
+                Text("\(entry.categoryCards.count) categories")
+                    .font(.caption2)
+                    .foregroundStyle(.secondary)
+            }
 
-            // Top cards section
+            // Best cards by category
             VStack(alignment: .leading, spacing: 6) {
                 Text("Best Cards")
-                    .font(.caption.bold())
+                    .font(.system(size: 11, weight: .semibold))
                     .foregroundStyle(.secondary)
 
-                if !entry.topCards.isEmpty {
-                    ForEach(entry.topCards.prefix(3)) { card in
-                        HStack {
-                            Image(systemName: entry.category.icon)
-                                .font(.caption2)
-                                .foregroundStyle(.blue)
-                                .frame(width: 16)
-                            Text(card.name)
-                                .font(.caption)
-                                .lineLimit(1)
-                            Spacer()
-                            Text(card.multiplier.multiplierString)
-                                .font(.caption.bold())
-                                .foregroundStyle(.blue)
-                        }
-                    }
-                } else {
+                if entry.categoryCards.isEmpty {
                     Text("Add cards to see recommendations")
-                        .font(.caption)
-                        .foregroundStyle(.secondary)
+                        .font(.caption2)
+                        .foregroundStyle(.tertiary)
+                } else {
+                    ForEach(entry.categoryCards.prefix(5)) { item in
+                        LargeCategoryRow(item: item)
+                    }
                 }
             }
 
@@ -159,46 +209,89 @@ struct LargeWidgetView: View {
             // Bonus progress section
             VStack(alignment: .leading, spacing: 6) {
                 Text("Bonus Progress")
-                    .font(.caption.bold())
+                    .font(.system(size: 11, weight: .semibold))
                     .foregroundStyle(.secondary)
 
                 if entry.bonusProgress.isEmpty {
                     Text("No active bonuses")
-                        .font(.caption)
+                        .font(.caption2)
                         .foregroundStyle(.tertiary)
                 } else {
-                    ForEach(Array(entry.bonusProgress.prefix(3).enumerated()), id: \.offset) { _, bonus in
-                        VStack(alignment: .leading, spacing: 2) {
-                            HStack {
-                                Text(bonus.cardName)
-                                    .font(.caption)
-                                    .lineLimit(1)
-                                Spacer()
-                                Text("\(bonus.daysRemaining)d left")
-                                    .font(.caption2)
-                                    .foregroundStyle(bonus.daysRemaining < 30 ? .red : .secondary)
-                            }
-                            ProgressView(value: bonus.progress)
-                                .tint(.blue)
-                            HStack {
-                                Text("$\(bonus.spentSoFar.formatted())")
-                                    .font(.caption2)
-                                Spacer()
-                                Text("$\(bonus.targetSpend.formatted())")
-                                    .font(.caption2)
-                                    .foregroundStyle(.secondary)
-                            }
-                        }
+                    ForEach(Array(entry.bonusProgress.prefix(2).enumerated()), id: \.offset) { _, bonus in
+                        BonusProgressRow(bonus: bonus)
                     }
                 }
             }
         }
-        .padding()
+        .padding(12)
         .containerBackground(.fill.tertiary, for: .widget)
     }
 }
 
-// MARK: - Lock Screen Circular Widget
+struct LargeCategoryRow: View {
+    let item: CategoryCard
+
+    var body: some View {
+        HStack(spacing: 6) {
+            Image(systemName: item.category.icon)
+                .font(.system(size: 11))
+                .foregroundStyle(.blue)
+                .frame(width: 14)
+
+            Text(item.category.displayName)
+                .font(.system(size: 11))
+                .foregroundStyle(.secondary)
+                .frame(width: 60, alignment: .leading)
+
+            WidgetMiniCard(issuer: item.issuer, size: 20)
+
+            Text(item.cardShortName)
+                .font(.system(size: 11))
+                .lineLimit(1)
+                .minimumScaleFactor(0.8)
+
+            Spacer()
+
+            Text(item.multiplier.multiplierString)
+                .font(.system(size: 12, weight: .bold, design: .rounded))
+                .foregroundStyle(.blue)
+        }
+    }
+}
+
+struct BonusProgressRow: View {
+    let bonus: WidgetBonus
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 2) {
+            HStack {
+                Text(bonus.cardName)
+                    .font(.system(size: 11))
+                    .lineLimit(1)
+                    .minimumScaleFactor(0.8)
+                Spacer()
+                Text("\(bonus.daysRemaining)d")
+                    .font(.system(size: 10, weight: .medium))
+                    .foregroundStyle(bonus.daysRemaining < 30 ? .red : .secondary)
+            }
+
+            ProgressView(value: bonus.progress)
+                .tint(.blue)
+                .scaleEffect(y: 0.8)
+
+            HStack {
+                Text("$\(bonus.spentSoFar.formatted())")
+                    .font(.system(size: 9))
+                Spacer()
+                Text("$\(bonus.targetSpend.formatted())")
+                    .font(.system(size: 9))
+                    .foregroundStyle(.secondary)
+            }
+        }
+    }
+}
+
+// MARK: - Lock Screen Widgets
 
 struct CircularWidgetView: View {
     let entry: CardEntry
@@ -206,19 +299,86 @@ struct CircularWidgetView: View {
     var body: some View {
         ZStack {
             AccessoryWidgetBackground()
-            VStack(spacing: 2) {
-                Image(systemName: entry.category.icon)
-                    .font(.caption)
-                if let card = entry.bestCard {
-                    Text(card.multiplier.multiplierString)
-                        .font(.caption2.bold())
-                } else {
-                    Text("--")
-                        .font(.caption2)
-                }
+            VStack(spacing: 1) {
+                Image(systemName: "creditcard.fill")
+                    .font(.system(size: 14))
+                Text("\(entry.categoryCards.count)")
+                    .font(.system(size: 16, weight: .bold, design: .rounded))
             }
         }
         .containerBackground(.fill.tertiary, for: .widget)
+    }
+}
+
+struct RectangularWidgetView: View {
+    let entry: CardEntry
+
+    var body: some View {
+        if let first = entry.categoryCards.first {
+            HStack(spacing: 6) {
+                WidgetMiniCard(issuer: first.issuer, size: 20)
+
+                VStack(alignment: .leading, spacing: 1) {
+                    Text(first.category.displayName)
+                        .font(.system(size: 10))
+                        .foregroundStyle(.secondary)
+                    HStack(spacing: 4) {
+                        Text(first.cardShortName)
+                            .font(.system(size: 12, weight: .medium))
+                        Text(first.multiplier.multiplierString)
+                            .font(.system(size: 12, weight: .bold))
+                            .foregroundStyle(.blue)
+                    }
+                }
+                Spacer()
+            }
+            .containerBackground(.fill.tertiary, for: .widget)
+        } else {
+            Text("Add cards in Plastik")
+                .font(.system(size: 12))
+                .containerBackground(.fill.tertiary, for: .widget)
+        }
+    }
+}
+
+// MARK: - Mini Card Icon for Widget
+
+struct WidgetMiniCard: View {
+    let issuer: String
+    var size: CGFloat = 24
+
+    private var gradient: LinearGradient {
+        let colors: [Color]
+        let issuerLower = issuer.lowercased()
+
+        if issuerLower.contains("chase") {
+            colors = [Color(hex: "004879"), Color(hex: "1a6bb3")]
+        } else if issuerLower.contains("amex") || issuerLower.contains("american express") {
+            colors = [Color(hex: "006FCF"), Color(hex: "00A1E4")]
+        } else if issuerLower.contains("capital one") {
+            colors = [Color(hex: "D03027"), Color(hex: "a02620")]
+        } else if issuerLower.contains("citi") {
+            colors = [Color(hex: "003B70"), Color(hex: "0066b2")]
+        } else if issuerLower.contains("discover") {
+            colors = [Color(hex: "FF6600"), Color(hex: "ff8533")]
+        } else if issuerLower.contains("bank of america") || issuerLower.contains("bofa") {
+            colors = [Color(hex: "E31837"), Color(hex: "a31228")]
+        } else if issuerLower.contains("wells fargo") {
+            colors = [Color(hex: "CD1409"), Color(hex: "9a0f07")]
+        } else if issuerLower.contains("barclays") {
+            colors = [Color(hex: "00AEEF"), Color(hex: "0088cc")]
+        } else {
+            colors = [Color(hex: "4a5568"), Color(hex: "2d3748")]
+        }
+
+        return LinearGradient(colors: colors, startPoint: .topLeading, endPoint: .bottomTrailing)
+    }
+
+    var body: some View {
+        RoundedRectangle(cornerRadius: size * 0.15)
+            .fill(gradient)
+            .frame(width: size, height: size * 0.625) // 16:10 ratio
+            .shadow(color: .black.opacity(0.15), radius: 1, x: 0, y: 1)
     }
 }
 
@@ -230,5 +390,61 @@ extension Double {
             return "\(Int(self))x"
         }
         return String(format: "%.1fx", self)
+    }
+}
+
+extension SpendCategory {
+    var shortName: String {
+        switch self {
+        case .dining: return "Dining"
+        case .travel: return "Travel"
+        case .groceries: return "Grocery"
+        case .gas: return "Gas"
+        case .streaming: return "Stream"
+        case .drugstores: return "Drug"
+        case .homeImprovement: return "Home"
+        case .online: return "Online"
+        case .entertainment: return "Fun"
+        case .utilities: return "Util"
+        case .other: return "Other"
+        }
+    }
+}
+
+extension CategoryCard {
+    var cardShortName: String {
+        displayName
+            .replacingOccurrences(of: "Preferred", with: "Pref")
+            .replacingOccurrences(of: "Reserve", with: "Res")
+            .replacingOccurrences(of: "Business", with: "Biz")
+            .replacingOccurrences(of: "Unlimited", with: "Unltd")
+            .replacingOccurrences(of: "American Express", with: "Amex")
+    }
+}
+
+// Color extension for widget
+extension Color {
+    init(hex: String) {
+        let hex = hex.trimmingCharacters(in: CharacterSet.alphanumerics.inverted)
+        var int: UInt64 = 0
+        Scanner(string: hex).scanHexInt64(&int)
+        let a, r, g, b: UInt64
+        switch hex.count {
+        case 3:
+            (a, r, g, b) = (255, (int >> 8) * 17, (int >> 4 & 0xF) * 17, (int & 0xF) * 17)
+        case 6:
+            (a, r, g, b) = (255, int >> 16, int >> 8 & 0xFF, int & 0xFF)
+        case 8:
+            (a, r, g, b) = (int >> 24, int >> 16 & 0xFF, int >> 8 & 0xFF, int & 0xFF)
+        default:
+            (a, r, g, b) = (255, 0, 0, 0)
+        }
+        self.init(
+            .sRGB,
+            red: Double(r) / 255,
+            green: Double(g) / 255,
+            blue: Double(b) / 255,
+            opacity: Double(a) / 255
+        )
     }
 }

@@ -4,7 +4,8 @@ import Foundation
 class RetentionAnalysisService {
 
     func analyzeCard(userCard: UserCard, card: CreditCard, feedService: DataFeedService) -> CardRetentionAnalysis {
-        let annualFee = card.annualFee
+        // Use effective annual fee (user override or catalog value)
+        let annualFee = userCard.annualFeeOverride ?? card.annualFee
         let totalBenefitValue = calculateBenefitValue(card: card, userCard: userCard)
         let netValue = totalBenefitValue - annualFee
 

@@ -35,11 +35,21 @@ struct AddCardView: View {
         return feedService.card(for: id)
     }
 
-    // Available issuers (only those with cards in the feed)
+    // Available issuers (those with cards in the feed + Custom)
     private var availableIssuers: [Issuer] {
         let issuersWithCards = Set(feedService.cards.map { $0.issuer })
-        return Issuer.allCases.filter { issuersWithCards.contains($0) }
+        var issuers = Issuer.allCases.filter { issuersWithCards.contains($0) || $0 == .custom }
+        // Sort alphabetically but keep Custom at end
+        issuers.sort { lhs, rhs in
+            if lhs == .custom { return false }
+            if rhs == .custom { return true }
+            return lhs.displayName < rhs.displayName
+        }
+        return issuers
     }
+
+    // State for custom card warning
+    @State private var showCustomWarning = false
 
     var body: some View {
         NavigationStack {
@@ -50,7 +60,7 @@ struct AddCardView: View {
                     cardTypeSelectionSection
                 }
 
-                if selectedCard != nil {
+                if canShowDetails {
                     cardDetailsSection
                     bonusTrackingSection
                     notesSection
@@ -66,7 +76,7 @@ struct AddCardView: View {
                 }
                 ToolbarItem(placement: .confirmationAction) {
                     Button("Add") { addCard() }
-                        .disabled(selectedCardId == nil)
+                        .disabled(!canShowDetails)
                 }
             }
         }
@@ -83,14 +93,49 @@ struct AddCardView: View {
                     Text(issuer.displayName).tag(issuer as Issuer?)
                 }
             }
-            .onChange(of: selectedIssuer) { _, _ in
+            .onChange(of: selectedIssuer) { _, newIssuer in
                 // Reset card selection when issuer changes
                 selectedCardId = nil
+                // Show warning for custom cards
+                showCustomWarning = newIssuer == .custom
+            }
+
+            // Custom Card Warning
+            if showCustomWarning {
+                VStack(alignment: .leading, spacing: 8) {
+                    HStack {
+                        Image(systemName: "exclamationmark.triangle.fill")
+                            .foregroundStyle(.orange)
+                        Text("Custom Card Limitations")
+                            .font(.headline)
+                    }
+
+                    Text("Custom cards are useful for personal tracking, but Plastik cannot automatically provide:")
+                        .font(.subheadline)
+                        .foregroundStyle(.secondary)
+
+                    VStack(alignment: .leading, spacing: 4) {
+                        LimitationRow(text: "Transfer partner information")
+                        LimitationRow(text: "Bonus category tracking")
+                        LimitationRow(text: "Signup bonus details")
+                        LimitationRow(text: "Annual fee reminders")
+                        LimitationRow(text: "\"Which card to use\" recommendations")
+                    }
+                    .padding(.leading, 4)
+
+                    Text("For full features, use a card from our catalog.")
+                        .font(.caption)
+                        .foregroundStyle(.secondary)
+                        .padding(.top, 4)
+                }
+                .padding(.vertical, 8)
             }
         } header: {
             Text("Card Issuer")
         } footer: {
-            Text("Select the bank or company that issued your card")
+            if !showCustomWarning {
+                Text("Select the bank or company that issued your card")
+            }
         }
     }
 
@@ -98,37 +143,52 @@ struct AddCardView: View {
 
     @ViewBuilder
     private var cardTypeSelectionSection: some View {
-        Section {
-            if cardsForIssuer.isEmpty {
-                Text("No cards available for this issuer")
-                    .foregroundStyle(.secondary)
-            } else {
-                Picker("Select Card", selection: $selectedCardId) {
-                    Text("Choose a card...").tag(nil as String?)
-                    ForEach(cardsForIssuer) { card in
-                        HStack {
-                            Text(card.name)
-                            if card.annualFee > 0 {
-                                Text("(\(card.annualFee.currencyFormatted)/yr)")
-                                    .foregroundStyle(.secondary)
-                            }
-                        }
-                        .tag(card.id as String?)
-                    }
+        // For Custom cards, skip the card picker - they'll enter details manually
+        if selectedIssuer == .custom {
+            // Custom card - no catalog selection needed
+            // Automatically set a custom card ID
+            EmptyView()
+                .onAppear {
+                    selectedCardId = "custom-\(UUID().uuidString)"
                 }
-                #if os(iOS)
-                .pickerStyle(.navigationLink)
-                #endif
-            }
-        } header: {
-            if let issuer = selectedIssuer {
-                Text("\(issuer.displayName) Cards")
-            }
-        } footer: {
-            if let card = selectedCard, let bonus = card.signupBonus {
-                Text("Current offer: \(bonus.points.commaFormatted) \(bonus.currency) after \(bonus.spendRequired.currencyFormatted) spend")
+        } else {
+            Section {
+                if cardsForIssuer.isEmpty {
+                    Text("No cards available for this issuer")
+                        .foregroundStyle(.secondary)
+                } else {
+                    Picker("Select Card", selection: $selectedCardId) {
+                        Text("Choose a card...").tag(nil as String?)
+                        ForEach(cardsForIssuer) { card in
+                            HStack {
+                                Text(card.name)
+                                if card.annualFee > 0 {
+                                    Text("(\(card.annualFee.currencyFormatted)/yr)")
+                                        .foregroundStyle(.secondary)
+                                }
+                            }
+                            .tag(card.id as String?)
+                        }
+                    }
+                    #if os(iOS)
+                    .pickerStyle(.navigationLink)
+                    #endif
+                }
+            } header: {
+                if let issuer = selectedIssuer {
+                    Text("\(issuer.displayName) Cards")
+                }
+            } footer: {
+                if let card = selectedCard, let bonus = card.signupBonus {
+                    Text("Current offer: \(bonus.points.commaFormatted) \(bonus.currency) after \(bonus.spendRequired.currencyFormatted) spend")
+                }
             }
         }
+    }
+
+    // Check if we can show details (either selected a card or using custom)
+    private var canShowDetails: Bool {
+        selectedCard != nil || selectedIssuer == .custom
     }
 
     // MARK: - Card Details
@@ -286,5 +346,22 @@ struct AddCardView: View {
 
         viewModel.addCard(card)
         dismiss()
+    }
+}
+
+// MARK: - Helper Views
+
+struct LimitationRow: View {
+    let text: String
+
+    var body: some View {
+        HStack(spacing: 6) {
+            Image(systemName: "xmark.circle")
+                .foregroundStyle(.red)
+                .font(.caption)
+            Text(text)
+                .font(.subheadline)
+                .foregroundStyle(.secondary)
+        }
     }
 }

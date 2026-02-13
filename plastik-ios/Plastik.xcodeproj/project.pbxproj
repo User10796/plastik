@@ -13,6 +13,7 @@
 		036E5EC33C364AD273617AD9 /* CompanionPassView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A9CEBDDE89C733550216CABE /* CompanionPassView.swift */; };
 		03F25C832BD04C56EF4B544E /* ChurnRule.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5C9E851803DFBA65EAD2CF34 /* ChurnRule.swift */; };
 		04109E5F897B42F255B20178 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 88BB1200F57BE154059D55AC /* Assets.xcassets */; };
+		0857DEF00ED123DA1F2D3B3D /* DesignSystem.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3F6352F48F4C1B994A257200 /* DesignSystem.swift */; };
 		08C4DCBAD16B9ABB4E49BDEE /* WalletViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 93B1EA2F85DD450E9487147E /* WalletViewModel.swift */; };
 		09983BA19A69CF8D182385B0 /* CardRetentionAnalysis.swift in Sources */ = {isa = PBXBuildFile; fileRef = DD68B6268D6F45C0C10E66A1 /* CardRetentionAnalysis.swift */; };
 		0B0E2CB87F2F64366D1EE0D4 /* PDFParserService.swift in Sources */ = {isa = PBXBuildFile; fileRef = E917F693875714330C9932A7 /* PDFParserService.swift */; };
@@ -25,6 +26,7 @@
 		1A7ADFD2AA2C38925BB9E059 /* WidgetViews.swift in Sources */ = {isa = PBXBuildFile; fileRef = 87A090F55C35780045B5E49B /* WidgetViews.swift */; };
 		1B4FEAE69851B69744CD2073 /* PDFParserService.swift in Sources */ = {isa = PBXBuildFile; fileRef = E917F693875714330C9932A7 /* PDFParserService.swift */; };
 		1BD1BD35C7AABE130DBDECB3 /* RetentionAnalysisService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40843D96452C2FBC603D1567 /* RetentionAnalysisService.swift */; };
+		221729937A897508B031AEA9 /* CreditCardView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9A126712B562B4D5C6014814 /* CreditCardView.swift */; };
 		24F54A81B430214B078B69B4 /* CardBenefit.swift in Sources */ = {isa = PBXBuildFile; fileRef = 600263A0D6EA6B6B09A61641 /* CardBenefit.swift */; };
 		2873FEE51AF10A97F8597DAD /* PointsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 189FDCD0460ABCF1C9FB9C90 /* PointsView.swift */; };
 		29B7507B4DA5EC4826ECD9B9 /* ChurnEligibilityService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1EBF979106EDD06068E0828A /* ChurnEligibilityService.swift */; };
@@ -36,6 +38,8 @@
 		3451BB410BE2561DF9C3192A /* ChurnTrackerView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 898751602769ABAF89BA40D9 /* ChurnTrackerView.swift */; };
 		361F0B96BEDB490720479EE3 /* CardBenefit.swift in Sources */ = {isa = PBXBuildFile; fileRef = 600263A0D6EA6B6B09A61641 /* CardBenefit.swift */; };
 		380E7F79B5C66EC5C5F177EC /* StressTestHelper.swift in Sources */ = {isa = PBXBuildFile; fileRef = 24C251A05CC625A78CE18314 /* StressTestHelper.swift */; };
+		3BE716872F3572A600838D5E /* EditCardView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3BE716862F3572A600838D5E /* EditCardView.swift */; };
+		3BE716882F3572A600838D5E /* EditCardView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3BE716862F3572A600838D5E /* EditCardView.swift */; };
 		3CE885A60E0C0C3FB6C246B3 /* RecommendationsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 467C5C12FE123AAED1F71B05 /* RecommendationsView.swift */; };
 		3DF2E2472E644E27F6C3BB03 /* StrategyView.swift in Sources */ = {isa = PBXBuildFile; fileRef = E547A6D2F49A7FB05673A43F /* StrategyView.swift */; };
 		42595524038FE0A8E7DD4857 /* CardOffer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1F38DC8129FDE5196B6DFC33 /* CardOffer.swift */; };
@@ -69,6 +73,7 @@
 		8AC864B359B6FB779ECE2DE3 /* OffersView.swift in Sources */ = {isa = PBXBuildFile; fileRef = D689416605E9D828B58AC088 /* OffersView.swift */; };
 		8AF2E165AA8B7A8C8CF98E76 /* DebugTestView.swift in Sources */ = {isa = PBXBuildFile; fileRef = D055C4B323802D014309BED3 /* DebugTestView.swift */; };
 		8D00BB20E26ECE67C518A6CC /* MemoryMonitor.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4A6EEB55A96C4B5115449108 /* MemoryMonitor.swift */; };
+		8D0BE602BF1F691329D785FC /* CreditCardView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9A126712B562B4D5C6014814 /* CreditCardView.swift */; };
 		8D7589C26577A22DD4BC4CBC /* CardListView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 00A581631BE61BD78BE7784E /* CardListView.swift */; };
 		90B961D013BCE518A904ECCD /* PlastikWidgetExtension.appex in Embed Foundation Extensions */ = {isa = PBXBuildFile; fileRef = 78D8161278A4801F1D768DDE /* PlastikWidgetExtension.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
 		91FB1135B87562389A42709A /* ChurnRule.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5C9E851803DFBA65EAD2CF34 /* ChurnRule.swift */; };
@@ -83,6 +88,7 @@
 		9DA700531252BC9ADA63638F /* NotificationService.swift in Sources */ = {isa = PBXBuildFile; fileRef = AF30A4D6981903B96AB05E7E /* NotificationService.swift */; };
 		9E8794DDF98CEF3A79F527CE /* TransferPartner.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3B8CF979E98D9AF4F5A5EBCB /* TransferPartner.swift */; };
 		A45F7DBD5736E32D1F5708E3 /* CloudKitService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4BF3CB5FE2314E70726652C8 /* CloudKitService.swift */; };
+		A5975DD196B8BD5E42620A0A /* DesignSystem.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3F6352F48F4C1B994A257200 /* DesignSystem.swift */; };
 		A68331324F1297B7964AF4F3 /* TransferPartnerMapView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3D951E64D30419B4E9F39558 /* TransferPartnerMapView.swift */; };
 		A689742AF7605515E1FD1037 /* Extensions.swift in Sources */ = {isa = PBXBuildFile; fileRef = 00212FACE4ECCD33E374B52D /* Extensions.swift */; };
 		A728A197CCB7FBFB8A3D05A1 /* CardViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 230F2598F2B4B81BA2191EA3 /* CardViewModel.swift */; };
@@ -90,11 +96,13 @@
 		B46B26DDFAE8884FD5E03CAF /* DataFeedService.swift in Sources */ = {isa = PBXBuildFile; fileRef = B80654403CB66D4F800E073C /* DataFeedService.swift */; };
 		BB6DA29DADA6C5458F2EA363 /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = C874045CA58D786AB13A3A95 /* ContentView.swift */; };
 		BD74FD90B07071DD578493A0 /* OffersViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7F45434677E91D28970C8F88 /* OffersViewModel.swift */; };
+		BF1C408357524254D813385E /* PayoffModels.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9744660DF6F4D14332798EE3 /* PayoffModels.swift */; };
 		BF83E64A21D485DD2D05687A /* ChurnTrackerView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 898751602769ABAF89BA40D9 /* ChurnTrackerView.swift */; };
 		C123F804FCAA41436B903ACC /* PayoffCalculatorView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 52926265C04B8CE40C17CD70 /* PayoffCalculatorView.swift */; };
 		C5B05E61354BD5C2E4CD487E /* Constants.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1D8DBA34FC79566213F366FF /* Constants.swift */; };
 		CA3DF78EDEAF7CE722623246 /* DataImportView.swift in Sources */ = {isa = PBXBuildFile; fileRef = EE0EE75BAED896877FA9BD13 /* DataImportView.swift */; };
 		CA82A2D40ED028C5637BB1F7 /* CardDetailView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 103F5398EA989E084ECAA187 /* CardDetailView.swift */; };
+		CCB56DB671777295839C6D41 /* PayoffModels.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9744660DF6F4D14332798EE3 /* PayoffModels.swift */; };
 		CD0F1A89C79D032BF1EA8BC1 /* OfferDetailView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8291564D8950BD565D0AF248 /* OfferDetailView.swift */; };
 		CFEFFC42B8DB51E6EFC56F2B /* SettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = F8738F05EA17E8C65CE78C99 /* SettingsView.swift */; };
 		D1A0E81AB10949D84A050B7B /* IssuerRulesView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B09B2182C2BF7D1DB52F1EB2 /* IssuerRulesView.swift */; };
@@ -113,6 +121,7 @@
 		E8E555C51B496608D0490083 /* MemoryMonitor.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4A6EEB55A96C4B5115449108 /* MemoryMonitor.swift */; };
 		EAE9879B724FA4B97EBDDE82 /* TransferPartnerMapView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3D951E64D30419B4E9F39558 /* TransferPartnerMapView.swift */; };
 		EBAF0845A0A80E2BDBD630D6 /* DashboardView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 039378DE531F1A82A3E2FAFC /* DashboardView.swift */; };
+		EE575355B4E28714DA285437 /* PayoffModels.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9744660DF6F4D14332798EE3 /* PayoffModels.swift */; };
 		EEDC2A9101D2BFFC1D02A8AA /* ImportView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4B2B95CE8BD609A912FD3AF0 /* ImportView.swift */; };
 		F20897F439102FC5F33733FB /* Extensions.swift in Sources */ = {isa = PBXBuildFile; fileRef = 00212FACE4ECCD33E374B52D /* Extensions.swift */; };
 		F628F44C70350257CE150035 /* CardOffer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1F38DC8129FDE5196B6DFC33 /* CardOffer.swift */; };
@@ -163,7 +172,9 @@
 		30E7B3EFE76984B9DD6CD6C6 /* PlastikWidget.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PlastikWidget.swift; sourceTree = "<group>"; };
 		38E167640E7CD1365FF9768C /* WalletView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WalletView.swift; sourceTree = "<group>"; };
 		3B8CF979E98D9AF4F5A5EBCB /* TransferPartner.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TransferPartner.swift; sourceTree = "<group>"; };
+		3BE716862F3572A600838D5E /* EditCardView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EditCardView.swift; sourceTree = "<group>"; };
 		3D951E64D30419B4E9F39558 /* TransferPartnerMapView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TransferPartnerMapView.swift; sourceTree = "<group>"; };
+		3F6352F48F4C1B994A257200 /* DesignSystem.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DesignSystem.swift; sourceTree = "<group>"; };
 		40843D96452C2FBC603D1567 /* RetentionAnalysisService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RetentionAnalysisService.swift; sourceTree = "<group>"; };
 		467C5C12FE123AAED1F71B05 /* RecommendationsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RecommendationsView.swift; sourceTree = "<group>"; };
 		4A6EEB55A96C4B5115449108 /* MemoryMonitor.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MemoryMonitor.swift; sourceTree = "<group>"; };
@@ -174,7 +185,7 @@
 		5C9E851803DFBA65EAD2CF34 /* ChurnRule.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ChurnRule.swift; sourceTree = "<group>"; };
 		600263A0D6EA6B6B09A61641 /* CardBenefit.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CardBenefit.swift; sourceTree = "<group>"; };
 		64D5DE1A0C9E35C2054DBD90 /* Plastik.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = Plastik.entitlements; sourceTree = "<group>"; };
-		78D8161278A4801F1D768DDE /* PlastikWidgetExtension.appex */ = {isa = PBXFileReference; explicitFileType = "wrapper.app-extension"; includeInIndex = 0; path = PlastikWidgetExtension.appex; sourceTree = BUILT_PRODUCTS_DIR; };
+		78D8161278A4801F1D768DDE /* PlastikWidgetExtension.appex */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = "wrapper.app-extension"; path = PlastikWidgetExtension.appex; sourceTree = BUILT_PRODUCTS_DIR; };
 		7D7DF727598679C2B7A76CA5 /* PlastikWidget.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = PlastikWidget.entitlements; sourceTree = "<group>"; };
 		7F45434677E91D28970C8F88 /* OffersViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OffersViewModel.swift; sourceTree = "<group>"; };
 		8291564D8950BD565D0AF248 /* OfferDetailView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OfferDetailView.swift; sourceTree = "<group>"; };
@@ -184,9 +195,11 @@
 		93B1EA2F85DD450E9487147E /* WalletViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WalletViewModel.swift; sourceTree = "<group>"; };
 		93E2A8C77C423C50DE865530 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; path = Info.plist; sourceTree = "<group>"; };
 		96583A155EA3AAD8CB9D6F62 /* PlastikApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PlastikApp.swift; sourceTree = "<group>"; };
+		9744660DF6F4D14332798EE3 /* PayoffModels.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PayoffModels.swift; sourceTree = "<group>"; };
+		9A126712B562B4D5C6014814 /* CreditCardView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CreditCardView.swift; sourceTree = "<group>"; };
 		9CC8A8DFFABF1324FFBFB387 /* UserCard.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UserCard.swift; sourceTree = "<group>"; };
 		A9CEBDDE89C733550216CABE /* CompanionPassView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CompanionPassView.swift; sourceTree = "<group>"; };
-		ADC9D0F06CA70FD770B4BDC0 /* Plastik.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Plastik.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		ADC9D0F06CA70FD770B4BDC0 /* Plastik.app */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = wrapper.application; path = Plastik.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		AF30A4D6981903B96AB05E7E /* NotificationService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NotificationService.swift; sourceTree = "<group>"; };
 		B09B2182C2BF7D1DB52F1EB2 /* IssuerRulesView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = IssuerRulesView.swift; sourceTree = "<group>"; };
 		B80654403CB66D4F800E073C /* DataFeedService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DataFeedService.swift; sourceTree = "<group>"; };
@@ -227,6 +240,7 @@
 		17A101BF61946349873EED71 /* Cards */ = {
 			isa = PBXGroup;
 			children = (
+				3BE716862F3572A600838D5E /* EditCardView.swift */,
 				FD8C6373AE9E00FFD2965F27 /* AddCardView.swift */,
 				103F5398EA989E084ECAA187 /* CardDetailView.swift */,
 				00A581631BE61BD78BE7784E /* CardListView.swift */,
@@ -338,10 +352,19 @@
 				DD68B6268D6F45C0C10E66A1 /* CardRetentionAnalysis.swift */,
 				5C9E851803DFBA65EAD2CF34 /* ChurnRule.swift */,
 				E7ED8835E12AEE7689EB31E2 /* CreditCard.swift */,
+				9744660DF6F4D14332798EE3 /* PayoffModels.swift */,
 				3B8CF979E98D9AF4F5A5EBCB /* TransferPartner.swift */,
 				9CC8A8DFFABF1324FFBFB387 /* UserCard.swift */,
 			);
 			path = Models;
+			sourceTree = "<group>";
+		};
+		76E84684E7D24AA72DE843C9 /* Components */ = {
+			isa = PBXGroup;
+			children = (
+				9A126712B562B4D5C6014814 /* CreditCardView.swift */,
+			);
+			path = Components;
 			sourceTree = "<group>";
 		};
 		84F14957061A15E9A59EB761 /* Benefits */ = {
@@ -387,6 +410,7 @@
 				84F14957061A15E9A59EB761 /* Benefits */,
 				17A101BF61946349873EED71 /* Cards */,
 				2A387EE807F60B720D991176 /* Churn */,
+				76E84684E7D24AA72DE843C9 /* Components */,
 				0173288AC43B52261B390444 /* Dashboard */,
 				EC4690ABFA367BD332829660 /* History */,
 				1A0819590E2FD5FC3EE6AA6D /* Offers */,
@@ -442,6 +466,7 @@
 			isa = PBXGroup;
 			children = (
 				1D8DBA34FC79566213F366FF /* Constants.swift */,
+				3F6352F48F4C1B994A257200 /* DesignSystem.swift */,
 				00212FACE4ECCD33E374B52D /* Extensions.swift */,
 			);
 			path = Utilities;
@@ -513,7 +538,7 @@
 			isa = PBXProject;
 			attributes = {
 				BuildIndependentTargetsInParallel = YES;
-				LastUpgradeCheck = 1630;
+				LastUpgradeCheck = 1500;
 				TargetAttributes = {
 					2754283C659F35E326596642 = {
 						DevelopmentTeam = JLV37S2CYD;
@@ -591,6 +616,7 @@
 				80C07E6FD4DB64978D94F916 /* CreditCard.swift in Sources */,
 				B46B26DDFAE8884FD5E03CAF /* DataFeedService.swift in Sources */,
 				A689742AF7605515E1FD1037 /* Extensions.swift in Sources */,
+				CCB56DB671777295839C6D41 /* PayoffModels.swift in Sources */,
 				2A22F3F24A4346F54F6BCE4D /* PlastikWidget.swift in Sources */,
 				9E8794DDF98CEF3A79F527CE /* TransferPartner.swift in Sources */,
 				4ED22FAE244CF3BADA393CDA /* UserCard.swift in Sources */,
@@ -602,6 +628,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				3BE716872F3572A600838D5E /* EditCardView.swift in Sources */,
 				42EC8B640952BB677B6CBC7D /* AddCardView.swift in Sources */,
 				DE96BB0C7D50235B78E1D8A3 /* ApplicationsView.swift in Sources */,
 				8831444BE719DAC029C629CB /* BenefitDetailView.swift in Sources */,
@@ -620,11 +647,13 @@
 				773C26AE52538FF829DAFC8E /* Constants.swift in Sources */,
 				84CFCBB68BFF87E7863DC9A5 /* ContentView.swift in Sources */,
 				33F3AC124364031EF1F2F1C8 /* CreditCard.swift in Sources */,
+				221729937A897508B031AEA9 /* CreditCardView.swift in Sources */,
 				76663B866E687452D60520C0 /* CreditPullsView.swift in Sources */,
 				EBAF0845A0A80E2BDBD630D6 /* DashboardView.swift in Sources */,
 				6166609650F8FD5A7736ADE7 /* DataFeedService.swift in Sources */,
 				97957BCE67C86FB75A1C443A /* DataImportView.swift in Sources */,
 				9CA58EA51977BDDA242D1489 /* DebugTestView.swift in Sources */,
+				0857DEF00ED123DA1F2D3B3D /* DesignSystem.swift in Sources */,
 				0244BD2E46DF4900CA5C236A /* Extensions.swift in Sources */,
 				EEDC2A9101D2BFFC1D02A8AA /* ImportView.swift in Sources */,
 				7DBBE7E34D79B7EBDDC9B8F2 /* IssuerRulesView.swift in Sources */,
@@ -636,6 +665,7 @@
 				AD1222B218B3F8BC0D04CD2C /* OptimalCardView.swift in Sources */,
 				1B4FEAE69851B69744CD2073 /* PDFParserService.swift in Sources */,
 				C123F804FCAA41436B903ACC /* PayoffCalculatorView.swift in Sources */,
+				EE575355B4E28714DA285437 /* PayoffModels.swift in Sources */,
 				DD7B37368D0BFD1314F96BDF /* PlastikApp.swift in Sources */,
 				2873FEE51AF10A97F8597DAD /* PointsView.swift in Sources */,
 				3CE885A60E0C0C3FB6C246B3 /* RecommendationsView.swift in Sources */,
@@ -656,6 +686,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				3BE716882F3572A600838D5E /* EditCardView.swift in Sources */,
 				022A7B372C1D533EE2D89878 /* AddCardView.swift in Sources */,
 				55EEDE96DC271D77EF734B4B /* ApplicationsView.swift in Sources */,
 				700B5D85CA118A49CC4DDC4D /* BenefitDetailView.swift in Sources */,
@@ -674,11 +705,13 @@
 				C5B05E61354BD5C2E4CD487E /* Constants.swift in Sources */,
 				BB6DA29DADA6C5458F2EA363 /* ContentView.swift in Sources */,
 				637AA0502F023C657760FD7F /* CreditCard.swift in Sources */,
+				8D0BE602BF1F691329D785FC /* CreditCardView.swift in Sources */,
 				9B7E072FA86A93D520FD3510 /* CreditPullsView.swift in Sources */,
 				7EF77AFFDE231005253D419C /* DashboardView.swift in Sources */,
 				FCF03A93C42C182ABED161AC /* DataFeedService.swift in Sources */,
 				CA3DF78EDEAF7CE722623246 /* DataImportView.swift in Sources */,
 				8AF2E165AA8B7A8C8CF98E76 /* DebugTestView.swift in Sources */,
+				A5975DD196B8BD5E42620A0A /* DesignSystem.swift in Sources */,
 				F20897F439102FC5F33733FB /* Extensions.swift in Sources */,
 				DE9A10535D33B87DCB19D232 /* ImportView.swift in Sources */,
 				D1A0E81AB10949D84A050B7B /* IssuerRulesView.swift in Sources */,
@@ -690,6 +723,7 @@
 				E7C1C611A1A09823762D4F7B /* OptimalCardView.swift in Sources */,
 				0B0E2CB87F2F64366D1EE0D4 /* PDFParserService.swift in Sources */,
 				923BBD4726290E2B75DD6C7D /* PayoffCalculatorView.swift in Sources */,
+				BF1C408357524254D813385E /* PayoffModels.swift in Sources */,
 				9380806A1BCA1E3EEB671499 /* PlastikApp.swift in Sources */,
 				6D0A445565FA47679169684B /* PointsView.swift in Sources */,
 				92D5DF2F5650AC226D56CA65 /* RecommendationsView.swift in Sources */,
@@ -744,7 +778,6 @@
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				CODE_SIGN_ENTITLEMENTS = Plastik/Plastik.entitlements;
 				COMBINE_HIDPI_IMAGES = YES;
-				DEAD_CODE_STRIPPING = YES;
 				ENABLE_HARDENED_RUNTIME = YES;
 				ENABLE_PREVIEWS = YES;
 				INFOPLIST_FILE = Plastik/Info.plist;
@@ -953,7 +986,6 @@
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				CODE_SIGN_ENTITLEMENTS = Plastik/Plastik.entitlements;
 				COMBINE_HIDPI_IMAGES = YES;
-				DEAD_CODE_STRIPPING = YES;
 				ENABLE_HARDENED_RUNTIME = YES;
 				ENABLE_PREVIEWS = YES;
 				INFOPLIST_FILE = Plastik/Info.plist;

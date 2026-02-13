@@ -5,67 +5,124 @@ struct RecommendationsView: View {
     @Environment(DataFeedService.self) private var feedService
 
     var body: some View {
-        List {
-            Section("Recommended Next Cards") {
-                if recommendations.isEmpty {
-                    ContentUnavailableView(
-                        "No Recommendations",
-                        systemImage: "lightbulb",
-                        description: Text("Add more cards to get personalized recommendations.")
-                    )
-                } else {
+        ScrollView {
+            VStack(alignment: .leading, spacing: 24) {
+                recommendationsContent
+            }
+            .padding(24)
+            .frame(maxWidth: 1200)
+            .frame(maxWidth: .infinity)
+        }
+        .navigationTitle("Recommendations")
+    }
+
+    @ViewBuilder
+    private var recommendationsContent: some View {
+        // Recommended Next Cards
+        VStack(alignment: .leading, spacing: 12) {
+            Text("Recommended Next Cards")
+                .font(.system(size: 17, weight: .semibold))
+                .foregroundStyle(.primary)
+
+            if recommendations.isEmpty {
+                ContentUnavailableView(
+                    "No Recommendations",
+                    systemImage: "lightbulb",
+                    description: Text("Add more cards to get personalized recommendations.")
+                )
+            } else {
+                VStack(spacing: 0) {
                     ForEach(recommendations) { card in
                         RecommendationRow(card: card, reason: reasonFor(card))
+                        if card.id != recommendations.last?.id {
+                            Divider()
+                        }
                     }
                 }
+                .padding(16)
+                .background(cardBackgroundColor)
+                .cornerRadius(12)
             }
+        }
 
-            Section("Category Gaps") {
+        // Category Gaps
+        VStack(alignment: .leading, spacing: 12) {
+            Text("Category Gaps")
+                .font(.system(size: 17, weight: .semibold))
+                .foregroundStyle(.primary)
+
+            VStack(spacing: 0) {
                 ForEach(categoryGaps, id: \.category) { gap in
                     HStack {
                         Image(systemName: gap.category.icon)
+                            .font(.system(size: 18))
                             .foregroundStyle(.orange)
-                            .frame(width: 24)
+                            .frame(width: 28)
 
-                        VStack(alignment: .leading, spacing: 2) {
+                        VStack(alignment: .leading, spacing: 4) {
                             Text(gap.category.displayName)
-                                .font(.subheadline.bold())
+                                .font(.system(size: 15, weight: .medium))
                             Text("Current best: \(gap.currentRate)")
-                                .font(.caption)
+                                .font(.system(size: 13))
                                 .foregroundStyle(.secondary)
                         }
 
                         Spacer()
 
                         Text("Could earn \(gap.potentialRate)")
-                            .font(.caption.bold())
+                            .font(.system(size: 13, weight: .semibold))
                             .foregroundStyle(.green)
                     }
-                    .padding(.vertical, 4)
+                    .frame(minHeight: 52)
+                    .padding(.horizontal, 16)
+                    .padding(.vertical, 8)
+
+                    if gap.category != categoryGaps.last?.category {
+                        Divider().padding(.leading, 60)
+                    }
                 }
             }
+            .background(cardBackgroundColor)
+            .cornerRadius(12)
+        }
 
-            Section("Optimization Tips") {
+        // Optimization Tips
+        VStack(alignment: .leading, spacing: 12) {
+            Text("Optimization Tips")
+                .font(.system(size: 17, weight: .semibold))
+                .foregroundStyle(.primary)
+
+            VStack(spacing: 0) {
                 TipRow(
                     icon: "dollarsign.circle",
                     title: "Maximize signup bonuses",
                     detail: "You have 2 cards with active bonuses to complete"
                 )
-
+                Divider().padding(.leading, 52)
                 TipRow(
                     icon: "arrow.triangle.swap",
                     title: "Consolidate transfer partners",
                     detail: "Consider cards that transfer to your most-used airlines"
                 )
-
+                Divider().padding(.leading, 52)
                 TipRow(
                     icon: "calendar",
                     title: "Annual fee optimization",
                     detail: "Review cards before annual fees hit to decide keep/cancel"
                 )
             }
+            .padding(16)
+            .background(cardBackgroundColor)
+            .cornerRadius(12)
         }
-        .navigationTitle("Recommendations")
+    }
+
+    private var cardBackgroundColor: Color {
+        #if os(macOS)
+        Color(nsColor: .controlBackgroundColor)
+        #else
+        Color(uiColor: .secondarySystemGroupedBackground)
+        #endif
     }
 
     private var recommendations: [CreditCard] {
@@ -121,28 +178,28 @@ struct RecommendationRow: View {
         VStack(alignment: .leading, spacing: 6) {
             HStack {
                 Text(card.name)
-                    .font(.subheadline.bold())
+                    .font(.system(size: 15, weight: .medium))
                 Spacer()
                 if card.annualFee > 0 {
                     Text(card.annualFee.currencyFormatted + "/yr")
-                        .font(.caption)
+                        .font(.system(size: 13))
                         .foregroundStyle(.secondary)
                 } else {
                     Text("No AF")
-                        .font(.caption)
+                        .font(.system(size: 13, weight: .medium))
                         .foregroundStyle(.green)
                 }
             }
 
             Text(card.issuer.displayName)
-                .font(.caption)
+                .font(.system(size: 13))
                 .foregroundStyle(.secondary)
 
             Text(reason)
-                .font(.caption)
+                .font(.system(size: 13))
                 .foregroundStyle(.blue)
         }
-        .padding(.vertical, 4)
+        .frame(minHeight: 64)
     }
 }
 
@@ -154,19 +211,19 @@ struct TipRow: View {
     var body: some View {
         HStack(alignment: .top, spacing: 12) {
             Image(systemName: icon)
-                .font(.title3)
+                .font(.system(size: 20))
                 .foregroundStyle(.blue)
-                .frame(width: 24)
+                .frame(width: 28)
 
-            VStack(alignment: .leading, spacing: 2) {
+            VStack(alignment: .leading, spacing: 4) {
                 Text(title)
-                    .font(.subheadline.bold())
+                    .font(.system(size: 15, weight: .medium))
                 Text(detail)
-                    .font(.caption)
+                    .font(.system(size: 13))
                     .foregroundStyle(.secondary)
             }
         }
-        .padding(.vertical, 4)
+        .frame(minHeight: 52)
     }
 }
 

@@ -1,12 +1,12 @@
 import SwiftUI
 
 struct CardDetailView: View {
+    @Environment(\.dismiss) private var dismiss
     @Environment(CardViewModel.self) private var viewModel
     @Environment(DataFeedService.self) private var feedService
     @State private var userCard: UserCard
     @State private var showDeleteConfirmation = false
-    @State private var isEditing = false
-    @State private var bonusSpendInput = ""
+    @State private var showEditSheet = false
 
     init(userCard: UserCard) {
         _userCard = State(initialValue: userCard)
@@ -16,6 +16,44 @@ struct CardDetailView: View {
         feedService.card(for: userCard.cardId)
     }
 
+    // MARK: - Computed Properties for Overrides
+
+    /// Returns the effective annual fee (user override or catalog value)
+    private var effectiveAnnualFee: Int {
+        userCard.annualFeeOverride ?? card?.annualFee ?? 0
+    }
+
+    /// Returns the effective issuer name
+    private var effectiveIssuerName: String {
+        if let override = userCard.issuerOverride, let issuer = Issuer(rawValue: override) {
+            return issuer.displayName
+        }
+        return card?.issuer.displayName ?? "Unknown"
+    }
+
+    /// Returns the effective card name
+    private var effectiveCardName: String {
+        userCard.productNameOverride ?? card?.name ?? userCard.nickname ?? "Unknown Card"
+    }
+
+    /// Returns the effective network
+    private var effectiveNetwork: CardNetwork {
+        if let override = userCard.networkOverride, let network = CardNetwork(rawValue: override) {
+            return network
+        }
+        return card?.network ?? .visa
+    }
+
+    /// Returns whether this card has user overrides
+    private var hasUserOverrides: Bool {
+        userCard.annualFeeOverride != nil ||
+        userCard.issuerOverride != nil ||
+        userCard.productNameOverride != nil ||
+        userCard.networkOverride != nil ||
+        userCard.signupBonusOverride != nil ||
+        userCard.rewardCategoriesOverride != nil
+    }
+
     var body: some View {
         List {
             if let card {
@@ -23,12 +61,17 @@ struct CardDetailView: View {
                 earningRatesSection(card)
                 if let bonus = userCard.signupBonusProgress {
                     bonusSection(bonus)
+                } else if let override = userCard.signupBonusOverride {
+                    signupBonusOverrideSection(override)
                 }
                 if !card.benefits.isEmpty {
                     benefitsSection(card)
                 }
                 if !card.transferPartners.isEmpty {
                     transferPartnersSection(card)
+                }
+                if userCard.currentBalance != nil || userCard.lastStatementDate != nil {
+                    statementDataSection
                 }
                 churnEligibilitySection(card)
                 churnRulesSection(card)
@@ -40,6 +83,14 @@ struct CardDetailView: View {
                 basicCardInfoSection
                 if let bonus = userCard.signupBonusProgress {
                     bonusSection(bonus)
+                } else if let override = userCard.signupBonusOverride {
+                    signupBonusOverrideSection(override)
+                }
+                if let categories = userCard.rewardCategoriesOverride, !categories.isEmpty {
+                    customEarningRatesSection(categories)
+                }
+                if userCard.currentBalance != nil || userCard.lastStatementDate != nil {
+                    statementDataSection
                 }
                 userInfoSection
                 actionsSection
@@ -51,31 +102,44 @@ struct CardDetailView: View {
         #endif
         .toolbar {
             ToolbarItem(placement: .primaryAction) {
-                Button(isEditing ? "Done" : "Edit") {
-                    if isEditing {
-                        // Apply bonus spend update
-                        if let amount = Int(bonusSpendInput),
-                           userCard.signupBonusProgress != nil {
-                            userCard.signupBonusProgress?.spentSoFar = amount
-                            if amount >= (userCard.signupBonusProgress?.targetSpend ?? 0) {
-                                userCard.signupBonusProgress?.completed = true
-                            }
-                        }
-                        viewModel.updateCard(userCard)
-                    }
-                    isEditing.toggle()
+                Button {
+                    showEditSheet = true
+                } label: {
+                    Image(systemName: "pencil.circle")
                 }
             }
         }
+        .sheet(isPresented: $showEditSheet, onDismiss: {
+            // Refresh local state from viewModel after editing
+            // Try UUID match first, then fallback to cardId + openDate
+            if let updated = viewModel.userCards.first(where: { $0.id == userCard.id }) {
+                userCard = updated
+            } else if let updated = viewModel.userCards.first(where: { $0.cardId == userCard.cardId && $0.openDate == userCard.openDate }) {
+                userCard = updated
+            }
+            // If neither found, keep the binding-updated local state (which has the edits)
+        }) {
+            EditCardView(userCard: $userCard, catalogCard: card)
+        }
         .confirmationDialog(
-            "Delete this card from your wallet?",
+            "Delete \"\(cardDisplayName)\"?",
             isPresented: $showDeleteConfirmation,
             titleVisibility: .visible
         ) {
             Button("Delete", role: .destructive) {
                 viewModel.deleteCard(userCard)
+                dismiss()
             }
+            Button("Cancel", role: .cancel) { }
+        } message: {
+            Text("This will permanently remove this card and all associated data. This cannot be undone.")
         }
+    }
+
+    // MARK: - Computed Properties
+
+    private var cardDisplayName: String {
+        userCard.nickname ?? card?.name ?? "this card"
     }
 
     // MARK: - Sections
@@ -96,10 +160,10 @@ struct CardDetailView: View {
                     .frame(height: 180)
                     .overlay(alignment: .topLeading) {
                         VStack(alignment: .leading, spacing: 4) {
-                            Text(card.issuer.displayName)
+                            Text(effectiveIssuerName)
                                 .font(.caption)
                                 .foregroundStyle(.white.opacity(0.8))
-                            Text(card.name)
+                            Text(effectiveCardName)
                                 .font(.title3.bold())
                                 .foregroundStyle(.white)
                         }
@@ -107,7 +171,7 @@ struct CardDetailView: View {
                     }
                     .overlay(alignment: .bottomTrailing) {
                         VStack(alignment: .trailing, spacing: 2) {
-                            Text(card.network.displayName)
+                            Text(effectiveNetwork.displayName)
                                 .font(.caption.bold())
                                 .foregroundStyle(.white.opacity(0.8))
                             if let last4 = userCard.lastFourDigits {
@@ -118,13 +182,28 @@ struct CardDetailView: View {
                         }
                         .padding()
                     }
+                    .overlay(alignment: .topTrailing) {
+                        if hasUserOverrides {
+                            Image(systemName: "pencil.circle.fill")
+                                .font(.title3)
+                                .foregroundStyle(.white)
+                                .padding(8)
+                        }
+                    }
 
                 HStack {
                     VStack(alignment: .leading) {
-                        Text("Annual Fee")
-                            .font(.caption)
-                            .foregroundStyle(.secondary)
-                        Text(card.annualFee > 0 ? card.annualFee.currencyFormatted : "No Fee")
+                        HStack(spacing: 4) {
+                            Text("Annual Fee")
+                                .font(.caption)
+                                .foregroundStyle(.secondary)
+                            if userCard.annualFeeOverride != nil {
+                                Image(systemName: "pencil.circle.fill")
+                                    .font(.caption2)
+                                    .foregroundStyle(.blue)
+                            }
+                        }
+                        Text(effectiveAnnualFee > 0 ? effectiveAnnualFee.currencyFormatted : "No Fee")
                             .font(.headline)
                     }
                     Spacer()
@@ -140,68 +219,160 @@ struct CardDetailView: View {
                         Text("Status")
                             .font(.caption)
                             .foregroundStyle(.secondary)
-                        Text(userCard.isActive ? "Active" : "Closed")
-                            .font(.headline)
-                            .foregroundStyle(userCard.isActive ? .green : .red)
+                        HStack(spacing: 4) {
+                            Image(systemName: userCard.cardStatus.icon)
+                                .font(.caption)
+                            Text(userCard.cardStatus.displayName)
+                                .font(.headline)
+                        }
+                        .foregroundStyle(statusColor)
                     }
                 }
             }
+        }
+    }
+
+    private var statusColor: Color {
+        switch userCard.cardStatus {
+        case .active: return .green
+        case .closed: return .red
+        case .productChanged: return .orange
         }
     }
 
     @ViewBuilder
     private func earningRatesSection(_ card: CreditCard) -> some View {
-        Section("Earning Rates") {
-            ForEach(card.earningRates.sorted { $0.multiplier > $1.multiplier }) { rate in
-                HStack {
-                    Image(systemName: rate.category.icon)
-                        .frame(width: 24)
-                        .foregroundStyle(.blue)
-                    Text(rate.category.displayName)
-                    Spacer()
-                    Text(rate.multiplier.multiplierFormatted)
-                        .font(.headline)
-                        .foregroundStyle(.primary)
-                    if let cap = rate.cap {
-                        Text("(up to $\(cap.commaFormatted))")
-                            .font(.caption)
-                            .foregroundStyle(.secondary)
+        Section {
+            // Show user-overridden categories if they exist
+            if let userCategories = userCard.rewardCategoriesOverride, !userCategories.isEmpty {
+                ForEach(userCategories.sorted { $0.rewardRate > $1.rewardRate }) { category in
+                    HStack {
+                        Image(systemName: iconForCategory(category.categoryName))
+                            .frame(width: 24)
+                            .foregroundStyle(.blue)
+                        Text(category.categoryName)
+                        Spacer()
+                        Text(category.formattedRate)
+                            .font(.headline)
+                            .foregroundStyle(.primary)
+                        if let cap = category.formattedCap {
+                            Text("(\(cap))")
+                                .font(.caption)
+                                .foregroundStyle(.secondary)
+                        }
+                        Image(systemName: "pencil.circle.fill")
+                            .font(.caption2)
+                            .foregroundStyle(.blue)
                     }
+                }
+
+                // Show catalog rates in a collapsed section if user has overrides
+                if !card.earningRates.isEmpty {
+                    DisclosureGroup {
+                        ForEach(card.earningRates.sorted { $0.multiplier > $1.multiplier }) { rate in
+                            HStack {
+                                Image(systemName: rate.category.icon)
+                                    .frame(width: 24)
+                                    .foregroundStyle(.secondary)
+                                Text(rate.category.displayName)
+                                    .foregroundStyle(.secondary)
+                                Spacer()
+                                Text(rate.multiplier.multiplierFormatted)
+                                    .font(.subheadline)
+                                    .foregroundStyle(.secondary)
+                            }
+                        }
+                    } label: {
+                        HStack {
+                            Image(systemName: "info.circle")
+                                .foregroundStyle(.secondary)
+                            Text("Original Catalog Rates")
+                                .foregroundStyle(.secondary)
+                        }
+                        .font(.caption)
+                    }
+                }
+            } else {
+                // Show catalog rates normally
+                ForEach(card.earningRates.sorted { $0.multiplier > $1.multiplier }) { rate in
+                    HStack {
+                        Image(systemName: rate.category.icon)
+                            .frame(width: 24)
+                            .foregroundStyle(.blue)
+                        Text(rate.category.displayName)
+                        Spacer()
+                        Text(rate.multiplier.multiplierFormatted)
+                            .font(.headline)
+                            .foregroundStyle(.primary)
+                        if let cap = rate.cap {
+                            Text("(up to $\(cap.commaFormatted))")
+                                .font(.caption)
+                                .foregroundStyle(.secondary)
+                        }
+                    }
+                }
+            }
+        } header: {
+            HStack {
+                Text("Earning Rates")
+                if userCard.rewardCategoriesOverride != nil {
+                    Text("(Custom)")
+                        .font(.caption2)
+                        .foregroundStyle(.blue)
                 }
             }
         }
     }
 
+    private func iconForCategory(_ name: String) -> String {
+        let lower = name.lowercased()
+        if lower.contains("dining") || lower.contains("restaurant") { return "fork.knife" }
+        if lower.contains("travel") { return "airplane" }
+        if lower.contains("groceries") || lower.contains("grocery") { return "cart.fill" }
+        if lower.contains("gas") { return "fuelpump.fill" }
+        if lower.contains("streaming") { return "play.tv.fill" }
+        if lower.contains("hotel") { return "bed.double.fill" }
+        if lower.contains("airline") { return "airplane.departure" }
+        if lower.contains("uber") || lower.contains("lyft") { return "car.fill" }
+        if lower.contains("online") || lower.contains("shopping") { return "globe" }
+        if lower.contains("drugstore") || lower.contains("pharmacy") { return "cross.case.fill" }
+        if lower.contains("home") { return "hammer.fill" }
+        if lower.contains("entertainment") { return "ticket.fill" }
+        return "creditcard.fill"
+    }
+
     @ViewBuilder
     private func bonusSection(_ bonus: BonusProgress) -> some View {
-        Section("Signup Bonus Progress") {
+        Section {
             VStack(alignment: .leading, spacing: 8) {
+                // Show user override info if available
+                if let override = userCard.signupBonusOverride {
+                    HStack {
+                        Text("\(override.bonusAmount.commaFormatted)")
+                            .font(.title2.bold())
+                        Text(override.bonusType.displayName.lowercased())
+                            .foregroundStyle(.secondary)
+                        Spacer()
+                        bonusStatusBadge(override.bonusEarned)
+                    }
+
+                    HStack {
+                        Text("Spend $\(override.spendRequirement.commaFormatted) in \(override.timeframeDays) days")
+                            .font(.subheadline)
+                            .foregroundStyle(.secondary)
+                        Spacer()
+                        Image(systemName: "pencil.circle.fill")
+                            .font(.caption2)
+                            .foregroundStyle(.blue)
+                    }
+                }
+
                 ProgressView(value: bonus.progress)
                     .tint(bonus.completed ? .green : (bonus.isExpired ? .red : .blue))
                     .scaleEffect(y: 2)
                     .padding(.vertical, 4)
 
-                if isEditing && !bonus.completed && !bonus.isExpired {
-                    HStack {
-                        Text("$")
-                            .font(.headline)
-                            .foregroundStyle(.secondary)
-                        TextField("Amount spent", text: $bonusSpendInput)
-                            #if os(iOS)
-                            .keyboardType(.numberPad)
-                            #endif
-                            .font(.title2.bold())
-                            .onAppear {
-                                bonusSpendInput = "\(bonus.spentSoFar)"
-                            }
-                        Text("of $\(bonus.targetSpend.commaFormatted)")
-                            .foregroundStyle(.secondary)
-                    }
-
-                    Text("Remaining: $\(max(0, bonus.targetSpend - (Int(bonusSpendInput) ?? bonus.spentSoFar)).commaFormatted)")
-                        .font(.caption)
-                        .foregroundStyle(.blue)
-                } else {
+                if userCard.signupBonusOverride == nil {
                     HStack {
                         Text("$\(bonus.spentSoFar.commaFormatted)")
                             .font(.title2.bold())
@@ -227,6 +398,122 @@ struct CardDetailView: View {
                 Text("Deadline: \(bonus.deadline.shortFormatted)")
                     .font(.caption)
                     .foregroundStyle(.secondary)
+            }
+        } header: {
+            HStack {
+                Text("Signup Bonus Progress")
+                if userCard.signupBonusOverride != nil {
+                    Text("(Custom)")
+                        .font(.caption2)
+                        .foregroundStyle(.blue)
+                }
+            }
+        }
+    }
+
+    @ViewBuilder
+    private func bonusStatusBadge(_ status: BonusEarnedStatus) -> some View {
+        switch status {
+        case .yes:
+            Label("Earned", systemImage: "checkmark.circle.fill")
+                .font(.caption.bold())
+                .foregroundStyle(.green)
+        case .no:
+            Label("Not Earned", systemImage: "xmark.circle.fill")
+                .font(.caption.bold())
+                .foregroundStyle(.red)
+        case .inProgress:
+            Label("In Progress", systemImage: "clock.fill")
+                .font(.caption.bold())
+                .foregroundStyle(.blue)
+        }
+    }
+
+    @ViewBuilder
+    private func signupBonusOverrideSection(_ override: SignupBonusOverride) -> some View {
+        Section {
+            VStack(alignment: .leading, spacing: 12) {
+                HStack {
+                    Text("\(override.bonusAmount.commaFormatted)")
+                        .font(.title2.bold())
+                    Text(override.bonusType.displayName.lowercased())
+                        .foregroundStyle(.secondary)
+                    Spacer()
+                    bonusStatusBadge(override.bonusEarned)
+                }
+
+                HStack {
+                    Image(systemName: "dollarsign.circle")
+                        .foregroundStyle(.blue)
+                    Text("Spend $\(override.spendRequirement.commaFormatted)")
+                    Spacer()
+                    Image(systemName: "clock")
+                        .foregroundStyle(.secondary)
+                    Text("\(override.timeframeDays) days")
+                        .foregroundStyle(.secondary)
+                }
+                .font(.subheadline)
+            }
+        } header: {
+            HStack {
+                Text("Signup Bonus")
+                Text("(Custom)")
+                    .font(.caption2)
+                    .foregroundStyle(.blue)
+            }
+        }
+    }
+
+    @ViewBuilder
+    private func customEarningRatesSection(_ categories: [UserRewardCategory]) -> some View {
+        Section {
+            ForEach(categories.sorted { $0.rewardRate > $1.rewardRate }) { category in
+                HStack {
+                    Image(systemName: iconForCategory(category.categoryName))
+                        .frame(width: 24)
+                        .foregroundStyle(.blue)
+                    Text(category.categoryName)
+                    Spacer()
+                    Text(category.formattedRate)
+                        .font(.headline)
+                        .foregroundStyle(.primary)
+                    if let cap = category.formattedCap {
+                        Text("(\(cap))")
+                            .font(.caption)
+                            .foregroundStyle(.secondary)
+                    }
+                }
+            }
+        } header: {
+            HStack {
+                Text("Earning Rates")
+                Text("(Custom)")
+                    .font(.caption2)
+                    .foregroundStyle(.blue)
+            }
+        }
+    }
+
+    @ViewBuilder
+    private var statementDataSection: some View {
+        Section("Statement Data") {
+            if let balance = userCard.currentBalance {
+                HStack {
+                    Label("Current Balance", systemImage: "dollarsign.circle")
+                    Spacer()
+                    Text(balance.currencyFormatted)
+                        .font(.headline)
+                        .foregroundColor(balance >= 0 ? .primary : .red)
+                }
+            }
+
+            if let date = userCard.lastStatementDate {
+                HStack {
+                    Label("Statement Date", systemImage: "calendar")
+                    Spacer()
+                    Text(date.shortFormatted)
+                        .foregroundStyle(.secondary)
+                }
             }
         }
     }
@@ -371,44 +658,33 @@ struct CardDetailView: View {
     @ViewBuilder
     private var userInfoSection: some View {
         Section("Card Info") {
-            if isEditing {
-                TextField("Nickname", text: Binding(
-                    get: { userCard.nickname ?? "" },
-                    set: { userCard.nickname = $0.isEmpty ? nil : $0 }
-                ))
-
-                TextField("Last 4 Digits", text: Binding(
-                    get: { userCard.lastFourDigits ?? "" },
-                    set: { userCard.lastFourDigits = $0.isEmpty ? nil : $0 }
-                ))
-                #if os(iOS)
-                .keyboardType(.numberPad)
-                #endif
-
-                Toggle("Active", isOn: $userCard.isActive)
-
-                TextField("Notes", text: Binding(
-                    get: { userCard.notes ?? "" },
-                    set: { userCard.notes = $0.isEmpty ? nil : $0 }
-                ), axis: .vertical)
-                .lineLimit(3...6)
-            } else {
-                if let nickname = userCard.nickname {
-                    LabeledContent("Nickname", value: nickname)
+            if let nickname = userCard.nickname {
+                LabeledContent("Nickname", value: nickname)
+            }
+            if let last4 = userCard.lastFourDigits {
+                LabeledContent("Last 4", value: last4)
+            }
+            LabeledContent("Opened", value: userCard.openDate.shortFormatted)
+            HStack {
+                Text("Status")
+                Spacer()
+                HStack(spacing: 4) {
+                    Image(systemName: userCard.cardStatus.icon)
+                        .font(.caption)
+                    Text(userCard.cardStatus.displayName)
                 }
-                if let last4 = userCard.lastFourDigits {
-                    LabeledContent("Last 4", value: last4)
-                }
-                LabeledContent("Opened", value: userCard.openDate.shortFormatted)
-                LabeledContent("Status", value: userCard.isActive ? "Active" : "Closed")
-                if let notes = userCard.notes {
-                    VStack(alignment: .leading, spacing: 4) {
-                        Text("Notes")
-                            .font(.caption)
-                            .foregroundStyle(.secondary)
-                        Text(notes)
-                            .font(.body)
-                    }
+                .foregroundStyle(statusColor)
+            }
+            if userCard.cardStatus == .closed, let closedDate = userCard.closedDate {
+                LabeledContent("Closed", value: closedDate.shortFormatted)
+            }
+            if let notes = userCard.notes {
+                VStack(alignment: .leading, spacing: 4) {
+                    Text("Notes")
+                        .font(.caption)
+                        .foregroundStyle(.secondary)
+                    Text(notes)
+                        .font(.body)
                 }
             }
         }
@@ -519,8 +795,15 @@ struct CardDetailView: View {
     @ViewBuilder
     private var actionsSection: some View {
         Section {
-            Button(userCard.isActive ? "Archive Card" : "Reactivate Card") {
-                userCard.isActive.toggle()
+            Button(userCard.cardStatus == .active ? "Archive Card" : "Reactivate Card") {
+                if userCard.cardStatus == .active {
+                    userCard.cardStatus = .closed
+                    userCard.closedDate = Date()
+                } else {
+                    userCard.cardStatus = .active
+                    userCard.closedDate = nil
+                }
+                userCard.isActive = userCard.cardStatus == .active
                 viewModel.updateCard(userCard)
             }
 
@@ -534,6 +817,7 @@ struct CardDetailView: View {
 
     private func issuerGradientStart(_ issuer: Issuer) -> Color {
         switch issuer {
+        // Tier 1: Major Issuers
         case .chase: return .blue
         case .amex: return .indigo
         case .citi: return .cyan
@@ -543,11 +827,31 @@ struct CardDetailView: View {
         case .wellsFargo: return .yellow
         case .bankOfAmerica: return .red
         case .discover: return .orange
+        // Tier 2: Mid-Market & Specialty Issuers
+        case .usaa: return .blue
+        case .navyFederal: return .blue
+        case .pnc: return .orange
+        case .tdBank: return .green
+        case .synchrony: return .blue
+        case .breadFinancial: return .orange
+        case .goldmanSachs: return .blue
+        case .fnbo: return .blue
+        case .creditOne: return .blue
+        case .upgrade: return .teal
+        case .avant: return .green
+        // Tier 3: Tech & Fintech Issuers
+        case .apple: return .gray
+        case .brex: return .orange
+        case .ramp: return .yellow
+        case .mercury: return .indigo
+        // Special
+        case .custom: return .gray
         }
     }
 
     private func issuerGradientEnd(_ issuer: Issuer) -> Color {
         switch issuer {
+        // Tier 1: Major Issuers
         case .chase: return .blue.opacity(0.6)
         case .amex: return .purple
         case .citi: return .blue
@@ -557,6 +861,25 @@ struct CardDetailView: View {
         case .wellsFargo: return .red
         case .bankOfAmerica: return .pink
         case .discover: return .yellow
+        // Tier 2: Mid-Market & Specialty Issuers
+        case .usaa: return .blue.opacity(0.6)
+        case .navyFederal: return .blue.opacity(0.6)
+        case .pnc: return .orange.opacity(0.6)
+        case .tdBank: return .green.opacity(0.6)
+        case .synchrony: return .blue.opacity(0.6)
+        case .breadFinancial: return .orange.opacity(0.6)
+        case .goldmanSachs: return .cyan
+        case .fnbo: return .blue.opacity(0.6)
+        case .creditOne: return .blue.opacity(0.6)
+        case .upgrade: return .cyan
+        case .avant: return .green.opacity(0.6)
+        // Tier 3: Tech & Fintech Issuers
+        case .apple: return .gray.opacity(0.6)
+        case .brex: return .red
+        case .ramp: return .orange
+        case .mercury: return .purple
+        // Special
+        case .custom: return .gray.opacity(0.6)
         }
     }
 }

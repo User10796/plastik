@@ -1,4 +1,5 @@
 import Foundation
+import CloudKit
 
 @Observable
 class CardViewModel {
@@ -11,8 +12,21 @@ class CardViewModel {
     var lastSyncError: String?
     var lastSyncDate: Date?
 
+    // Track last local edit to prevent sync race conditions
+    private var lastLocalEditTime: Date?
+    private let syncDebounceInterval: TimeInterval = 2.0  // Seconds to wait after local edit before allowing sync
+
     private let cloudKit = CloudKitService()
     private let localStorageKey = "localUserCards"
+
+    init() {
+        // Setup callback for remote CloudKit changes
+        cloudKit.onRemoteChange = { [weak self] in
+            Task {
+                await self?.syncIncrementalChanges()
+            }
+        }
+    }
 
     // Shared App Group for widget access
     private var sharedDefaults: UserDefaults? {
@@ -30,17 +44,33 @@ class CardViewModel {
                 (card.nickname?.localizedCaseInsensitiveContains(searchText) ?? false)
             }
         }
-        return result.sorted { $0.openDate > $1.openDate }
+        return sortedCards(result)
     }
 
-    // Active cards (not closed)
+    // Active cards (not closed) - sorted by sortOrder or dateAdded
     var activeCards: [UserCard] {
-        userCards.filter { $0.closedDate == nil }
+        sortedCards(userCards.filter { $0.closedDate == nil })
     }
 
-    // Closed cards
+    // Closed cards - sorted by closed date descending
     var closedCards: [UserCard] {
         userCards.filter { $0.closedDate != nil }
+            .sorted { ($0.closedDate ?? Date.distantPast) > ($1.closedDate ?? Date.distantPast) }
+    }
+
+    /// Sort cards by sortOrder (if set) or dateAdded descending (newest first)
+    private func sortedCards(_ cards: [UserCard]) -> [UserCard] {
+        cards.sorted { card1, card2 in
+            // If both have sortOrder, use that
+            if let order1 = card1.sortOrder, let order2 = card2.sortOrder {
+                return order1 < order2
+            }
+            // If only one has sortOrder, it comes first
+            if card1.sortOrder != nil { return true }
+            if card2.sortOrder != nil { return false }
+            // Neither has sortOrder - sort by dateAdded descending (newest first)
+            return card1.dateAdded > card2.dateAdded
+        }
     }
 
     var cardsWithActiveBonus: [UserCard] {
@@ -75,8 +105,94 @@ class CardViewModel {
         await syncFromCloud()
     }
 
+    /// Incremental sync - only fetch changes since last sync
+    func syncIncrementalChanges() async {
+        // Don't overlap syncs
+        guard !isSyncing else {
+            print("CloudKit: Skipping incremental sync - already syncing")
+            return
+        }
+
+        // Don't sync immediately after a local edit to prevent race conditions
+        if let lastEdit = lastLocalEditTime,
+           Date().timeIntervalSince(lastEdit) < syncDebounceInterval {
+            print("CloudKit: Skipping sync - recent local edit (\(Date().timeIntervalSince(lastEdit))s ago)")
+            return
+        }
+
+        await MainActor.run { isSyncing = true; lastSyncError = nil }
+
+        do {
+            let (changedCards, deletedIDs) = try await cloudKit.fetchChanges()
+
+            await MainActor.run {
+                // Apply deletions
+                for deletedID in deletedIDs {
+                    if let index = userCards.firstIndex(where: {
+                        $0.ckRecordID == deletedID || $0.id.uuidString == deletedID
+                    }) {
+                        print("CloudKit: Removing deleted card \(userCards[index].cardId)")
+                        userCards.remove(at: index)
+                    }
+                }
+
+                // Apply changes
+                for changedCard in changedCards {
+                    if let index = userCards.firstIndex(where: {
+                        $0.ckRecordID == changedCard.ckRecordID ||
+                        $0.id == changedCard.id ||
+                        (cardKey($0) == cardKey(changedCard))
+                    }) {
+                        // Update existing card ONLY if cloud version is strictly newer
+                        // Use > not >= to prefer local changes when timestamps are equal
+                        if changedCard.lastModified > userCards[index].lastModified {
+                            print("CloudKit: Updating card \(changedCard.cardId) from remote (cloud newer)")
+                            userCards[index] = changedCard
+                        } else {
+                            print("CloudKit: Keeping local card \(userCards[index].cardId) (local newer or equal)")
+                        }
+                    } else {
+                        // New card from cloud
+                        print("CloudKit: Adding new card \(changedCard.cardId) from remote")
+                        userCards.append(changedCard)
+                    }
+                }
+
+                if !changedCards.isEmpty || !deletedIDs.isEmpty {
+                    saveToLocal()
+                    print("CloudKit: Incremental sync applied \(changedCards.count) changes, \(deletedIDs.count) deletions")
+                } else {
+                    print("CloudKit: Incremental sync - no changes")
+                }
+
+                lastSyncDate = Date()
+                isSyncing = false
+            }
+        } catch {
+            let errorMessage = error.localizedDescription
+            print("CloudKit incremental sync error: \(errorMessage)")
+            await MainActor.run {
+                lastSyncError = errorMessage
+                isSyncing = false
+            }
+
+            // If incremental sync failed, try full sync
+            if let ckError = error as? CKError, ckError.code == .changeTokenExpired {
+                print("CloudKit: Change token expired, doing full sync")
+                await syncFromCloud()
+            }
+        }
+    }
+
+    /// Helper to create a unique key for deduplication
+    private func cardKey(_ card: UserCard) -> String {
+        let dateStr = ISO8601DateFormatter().string(from: card.openDate)
+        return "\(card.cardId)|\(dateStr)"
+    }
+
     func addCard(_ card: UserCard) {
         userCards.append(card)
+        lastLocalEditTime = Date()  // Track when we made local edits
         saveToLocal()
         Task {
             try? await cloudKit.saveUserCard(card)
@@ -84,14 +200,27 @@ class CardViewModel {
     }
 
     func updateCard(_ card: UserCard) {
+        var updated = card
+        updated.lastModified = Date()
+
         if let index = userCards.firstIndex(where: { $0.id == card.id }) {
-            var updated = card
-            updated.lastModified = Date()
+            // Found by UUID - update in place
             userCards[index] = updated
-            saveToLocal()
-            Task {
-                try? await cloudKit.saveUserCard(updated)
-            }
+            print("CardViewModel: Updated card \(card.cardId) by UUID")
+        } else if let index = userCards.firstIndex(where: { $0.cardId == card.cardId && $0.openDate == card.openDate }) {
+            // Fallback: find by cardId + openDate (handles UUID mismatches)
+            userCards[index] = updated
+            print("CardViewModel: Updated card \(card.cardId) by cardId+openDate fallback")
+        } else {
+            // Card not found - this shouldn't happen but log it
+            print("CardViewModel: WARNING - Card \(card.cardId) not found in array, cannot update")
+            return
+        }
+
+        lastLocalEditTime = Date()  // Track when we made local edits
+        saveToLocal()
+        Task {
+            try? await cloudKit.saveUserCard(updated)
         }
     }
 
@@ -100,6 +229,49 @@ class CardViewModel {
         saveToLocal()
         Task {
             try? await cloudKit.deleteUserCard(card)
+        }
+    }
+
+    // MARK: - Card Ordering
+
+    /// Move active cards from source indices to destination index
+    func moveActiveCards(from source: IndexSet, to destination: Int) {
+        // Get sorted active cards
+        var active = activeCards
+
+        // Perform the move
+        active.move(fromOffsets: source, toOffset: destination)
+
+        // Update sortOrder for all active cards
+        updateSortOrderForCards(active)
+    }
+
+    /// Move closed cards from source indices to destination index
+    func moveClosedCards(from source: IndexSet, to destination: Int) {
+        var closed = closedCards
+        closed.move(fromOffsets: source, toOffset: destination)
+        updateSortOrderForCards(closed)
+    }
+
+    /// Update sortOrder for a list of cards and persist changes
+    private func updateSortOrderForCards(_ orderedCards: [UserCard]) {
+        var cardsToUpdate: [UserCard] = []
+
+        for (index, card) in orderedCards.enumerated() {
+            if let userIndex = userCards.firstIndex(where: { $0.id == card.id }) {
+                userCards[userIndex].sortOrder = index
+                userCards[userIndex].lastModified = Date()
+                cardsToUpdate.append(userCards[userIndex])
+            }
+        }
+
+        saveToLocal()
+
+        // Sync updated cards to CloudKit
+        Task {
+            for card in cardsToUpdate {
+                try? await cloudKit.saveUserCard(card)
+            }
         }
     }
 
@@ -171,12 +343,6 @@ class CardViewModel {
         var localOnlyCards: [UserCard] = []
         var newerLocalCards: [UserCard] = []
 
-        // Helper to create a unique key for deduplication
-        func cardKey(_ card: UserCard) -> String {
-            let dateStr = ISO8601DateFormatter().string(from: card.openDate)
-            return "\(card.cardId)|\(dateStr)"
-        }
-
         // Build lookup of cloud cards
         var cloudCardsByKey: [String: UserCard] = [:]
         for cloudCard in cloudCards {
@@ -187,16 +353,18 @@ class CardViewModel {
         for cloudCard in cloudCards {
             let key = cardKey(cloudCard)
             if !seenKeys.contains(key) {
-                // Check if local version is newer
+                // Check if local version is newer or equal (prefer local on ties)
                 if let localCard = userCards.first(where: { cardKey($0) == key }) {
-                    if localCard.lastModified > cloudCard.lastModified {
-                        // Local is newer - use local and sync to cloud
+                    if localCard.lastModified >= cloudCard.lastModified {
+                        // Local is newer or same - use local (prefer local to preserve edits)
                         var updatedLocal = localCard
                         updatedLocal.ckRecordID = cloudCard.ckRecordID // Keep the cloud record ID
                         merged.append(updatedLocal)
-                        newerLocalCards.append(updatedLocal)
+                        if localCard.lastModified > cloudCard.lastModified {
+                            newerLocalCards.append(updatedLocal)
+                        }
                     } else {
-                        // Cloud is newer or same - use cloud
+                        // Cloud is strictly newer - use cloud
                         merged.append(cloudCard)
                     }
                 } else {
