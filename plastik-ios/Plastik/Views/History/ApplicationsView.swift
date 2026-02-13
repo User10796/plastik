@@ -39,7 +39,7 @@ struct ApplicationsView: View {
                         description: Text("Applications are tracked automatically when you add cards.")
                     )
                 } else {
-                    ForEach(applicationHistory, id: \.cardId) { application in
+                    ForEach(applicationHistory, id: \.id) { application in
                         ApplicationRow(application: application)
                     }
                 }
@@ -116,13 +116,13 @@ struct ApplicationsView: View {
         cardViewModel.totalAnnualCards24Months
     }
 
-    private var applicationHistory: [(cardId: String, cardName: String, issuer: String, date: Date, approved: Bool)] {
+    private var applicationHistory: [(id: String, cardName: String, issuer: String, date: Date, approved: Bool)] {
         cardViewModel.userCards
             .sorted { $0.openDate > $1.openDate }
             .compactMap { userCard in
                 guard let card = feedService.card(for: userCard.cardId) else { return nil }
                 return (
-                    cardId: userCard.cardId,
+                    id: userCard.id.uuidString,
                     cardName: userCard.nickname ?? card.name,
                     issuer: card.issuer.displayName,
                     date: userCard.openDate,
@@ -133,7 +133,7 @@ struct ApplicationsView: View {
 }
 
 struct ApplicationRow: View {
-    let application: (cardId: String, cardName: String, issuer: String, date: Date, approved: Bool)
+    let application: (id: String, cardName: String, issuer: String, date: Date, approved: Bool)
 
     var body: some View {
         HStack {
