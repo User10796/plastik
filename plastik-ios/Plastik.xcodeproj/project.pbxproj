@@ -64,6 +64,7 @@
 		78EC22E2E3B0B640AFB65E6B /* StressTestHelper.swift in Sources */ = {isa = PBXBuildFile; fileRef = 24C251A05CC625A78CE18314 /* StressTestHelper.swift */; };
 		7D03987C1A6D3574B90165FA /* CardDetailView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 103F5398EA989E084ECAA187 /* CardDetailView.swift */; };
 		7DBBE7E34D79B7EBDDC9B8F2 /* IssuerRulesView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B09B2182C2BF7D1DB52F1EB2 /* IssuerRulesView.swift */; };
+		A4304076E0F2CCEFC44AF081 /* TransferPartnerDetailView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 49AFDAC47E607061CCE5C132 /* TransferPartnerDetailView.swift */; };
 		7EF77AFFDE231005253D419C /* DashboardView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 039378DE531F1A82A3E2FAFC /* DashboardView.swift */; };
 		80C07E6FD4DB64978D94F916 /* CreditCard.swift in Sources */ = {isa = PBXBuildFile; fileRef = E7ED8835E12AEE7689EB31E2 /* CreditCard.swift */; };
 		84CFCBB68BFF87E7863DC9A5 /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = C874045CA58D786AB13A3A95 /* ContentView.swift */; };
@@ -120,6 +121,7 @@
 		E7C1C611A1A09823762D4F7B /* OptimalCardView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1E1F69B8381D813B336E79E7 /* OptimalCardView.swift */; };
 		E8E555C51B496608D0490083 /* MemoryMonitor.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4A6EEB55A96C4B5115449108 /* MemoryMonitor.swift */; };
 		EAE9879B724FA4B97EBDDE82 /* TransferPartnerMapView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3D951E64D30419B4E9F39558 /* TransferPartnerMapView.swift */; };
+		8471E74EF212C7225E51E95B /* TransferPartnerDetailView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 49AFDAC47E607061CCE5C132 /* TransferPartnerDetailView.swift */; };
 		EBAF0845A0A80E2BDBD630D6 /* DashboardView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 039378DE531F1A82A3E2FAFC /* DashboardView.swift */; };
 		EE575355B4E28714DA285437 /* PayoffModels.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9744660DF6F4D14332798EE3 /* PayoffModels.swift */; };
 		EEDC2A9101D2BFFC1D02A8AA /* ImportView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4B2B95CE8BD609A912FD3AF0 /* ImportView.swift */; };
@@ -157,6 +159,7 @@
 /* Begin PBXFileReference section */
 		00212FACE4ECCD33E374B52D /* Extensions.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Extensions.swift; sourceTree = "<group>"; };
 		00A581631BE61BD78BE7784E /* CardListView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CardListView.swift; sourceTree = "<group>"; };
+		49AFDAC47E607061CCE5C132 /* TransferPartnerDetailView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TransferPartnerDetailView.swift; sourceTree = "<group>"; };
 		039378DE531F1A82A3E2FAFC /* DashboardView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DashboardView.swift; sourceTree = "<group>"; };
 		0E9B5EE7DE3D0C5B75C5209A /* ApplicationsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ApplicationsView.swift; sourceTree = "<group>"; };
 		103F5398EA989E084ECAA187 /* CardDetailView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CardDetailView.swift; sourceTree = "<group>"; };
@@ -224,6 +227,7 @@
 			isa = PBXGroup;
 			children = (
 				039378DE531F1A82A3E2FAFC /* DashboardView.swift */,
+				49AFDAC47E607061CCE5C132 /* TransferPartnerDetailView.swift */,
 			);
 			path = Dashboard;
 			sourceTree = "<group>";
@@ -649,7 +653,8 @@
 				33F3AC124364031EF1F2F1C8 /* CreditCard.swift in Sources */,
 				221729937A897508B031AEA9 /* CreditCardView.swift in Sources */,
 				76663B866E687452D60520C0 /* CreditPullsView.swift in Sources */,
-				EBAF0845A0A80E2BDBD630D6 /* DashboardView.swift in Sources */,
+		EBAF0845A0A80E2BDBD630D6 /* DashboardView.swift in Sources */,
+				8471E74EF212C7225E51E95B /* TransferPartnerDetailView.swift in Sources */,
 				6166609650F8FD5A7736ADE7 /* DataFeedService.swift in Sources */,
 				97957BCE67C86FB75A1C443A /* DataImportView.swift in Sources */,
 				9CA58EA51977BDDA242D1489 /* DebugTestView.swift in Sources */,
@@ -707,7 +712,8 @@
 				637AA0502F023C657760FD7F /* CreditCard.swift in Sources */,
 				8D0BE602BF1F691329D785FC /* CreditCardView.swift in Sources */,
 				9B7E072FA86A93D520FD3510 /* CreditPullsView.swift in Sources */,
-				7EF77AFFDE231005253D419C /* DashboardView.swift in Sources */,
+		7EF77AFFDE231005253D419C /* DashboardView.swift in Sources */,
+				A4304076E0F2CCEFC44AF081 /* TransferPartnerDetailView.swift in Sources */,
 				FCF03A93C42C182ABED161AC /* DataFeedService.swift in Sources */,
 				CA3DF78EDEAF7CE722623246 /* DataImportView.swift in Sources */,
 				8AF2E165AA8B7A8C8CF98E76 /* DebugTestView.swift in Sources */,
