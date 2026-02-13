@@ -103,14 +103,14 @@ struct MediumWidgetView: View {
     let entry: CardEntry
 
     var body: some View {
-        VStack(alignment: .leading, spacing: 6) {
+        VStack(alignment: .leading, spacing: 4) {
             // Header
             HStack {
                 Image(systemName: "creditcard.fill")
-                    .font(.system(size: 12))
+                    .font(.system(size: 13))
                     .foregroundStyle(.blue)
-                Text("Best Cards by Category")
-                    .font(.system(size: 12, weight: .semibold))
+                Text("Best Cards")
+                    .font(.system(size: 13, weight: .semibold))
                 Spacer()
             }
 
@@ -120,16 +120,16 @@ struct MediumWidgetView: View {
                     .foregroundStyle(.secondary)
                     .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .center)
             } else {
-                // Vertical list - one category per row
-                VStack(spacing: 4) {
-                    ForEach(entry.categoryCards.prefix(4)) { item in
+                VStack(spacing: 3) {
+                    ForEach(entry.categoryCards.prefix(5)) { item in
                         MediumCategoryRow(item: item)
                     }
                 }
                 Spacer(minLength: 0)
             }
         }
-        .padding(10)
+        .padding(.horizontal, 12)
+        .padding(.vertical, 8)
         .containerBackground(.fill.tertiary, for: .widget)
     }
 }
@@ -138,25 +138,25 @@ struct MediumCategoryRow: View {
     let item: CategoryCard
 
     var body: some View {
-        HStack(spacing: 6) {
+        HStack(spacing: 8) {
             // Category icon
             Image(systemName: item.category.icon)
-                .font(.system(size: 10))
+                .font(.system(size: 12))
                 .foregroundStyle(.blue)
-                .frame(width: 12)
+                .frame(width: 14)
 
             // Category name
             Text(item.category.shortName)
-                .font(.system(size: 10, weight: .medium))
+                .font(.system(size: 12, weight: .medium))
                 .foregroundStyle(.secondary)
-                .frame(width: 44, alignment: .leading)
+                .frame(width: 48, alignment: .leading)
 
             // Mini card icon
-            WidgetMiniCard(issuer: item.issuer, size: 20)
+            WidgetMiniCard(issuer: item.issuer, size: 22)
 
             // Full card name
             Text(item.cardShortName)
-                .font(.system(size: 11, weight: .medium))
+                .font(.system(size: 13, weight: .medium))
                 .lineLimit(1)
                 .minimumScaleFactor(0.8)
 
@@ -164,7 +164,7 @@ struct MediumCategoryRow: View {
 
             // Multiplier
             Text(item.multiplier.multiplierString)
-                .font(.system(size: 12, weight: .bold, design: .rounded))
+                .font(.system(size: 14, weight: .bold, design: .rounded))
                 .foregroundStyle(item.multiplier >= 3 ? .blue : .primary)
         }
     }
