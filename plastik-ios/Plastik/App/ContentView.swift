@@ -77,12 +77,6 @@ struct StrategyTabView: View {
 struct MoreTabView: View {
     var body: some View {
         List {
-            Section("Wallet") {
-                NavigationLink(destination: CompanionPassView()) {
-                    Label("Companion Passes", systemImage: "person.2.fill")
-                }
-            }
-
             Section("Tools") {
                 NavigationLink(destination: ImportView()) {
                     Label("Import", systemImage: "square.and.arrow.down")
@@ -119,8 +113,7 @@ enum SidebarItem: String, CaseIterable, Hashable {
 
     // Wallet
     case cards = "Cards"
-    case points = "Points"
-    case companionPasses = "Companion Passes"
+    case points = "Points & Programs"
 
     // Strategy
     case recommendations = "Recommendations"
@@ -143,7 +136,6 @@ enum SidebarItem: String, CaseIterable, Hashable {
         case .dashboard: return "square.grid.2x2"
         case .cards: return "creditcard.fill"
         case .points: return "star.fill"
-        case .companionPasses: return "person.2.fill"
         case .recommendations: return "lightbulb.fill"
         case .transferPartners: return "arrow.triangle.swap"
         case .churnTracker: return "chart.bar.fill"
@@ -158,6 +150,7 @@ enum SidebarItem: String, CaseIterable, Hashable {
 
 struct MacContentView: View {
     @State private var selectedItem: SidebarItem? = .dashboard
+    @State private var navigationPath = NavigationPath()
 
     var body: some View {
         NavigationSplitView {
@@ -173,12 +166,9 @@ struct MacContentView: View {
                     Label("Cards", systemImage: "creditcard.fill")
                         .font(.system(size: 14))
                         .tag(SidebarItem.cards)
-                    Label("Points", systemImage: "star.fill")
+                    Label("Points & Programs", systemImage: "star.fill")
                         .font(.system(size: 14))
                         .tag(SidebarItem.points)
-                    Label("Companion Passes", systemImage: "person.2.fill")
-                        .font(.system(size: 14))
-                        .tag(SidebarItem.companionPasses)
                 } header: {
                     Text("WALLET")
                         .font(.system(size: 12, weight: .medium))
@@ -248,9 +238,14 @@ struct MacContentView: View {
 
         } detail: {
             // DETAIL area - content based on sidebar selection
-            NavigationStack {
+            // NavigationPath resets when sidebar selection changes
+            NavigationStack(path: $navigationPath) {
                 contentView
             }
+        }
+        .onChange(of: selectedItem) { _, _ in
+            // Reset navigation stack when switching sidebar items
+            navigationPath = NavigationPath()
         }
         .navigationTitle("Plastik")
         #if os(macOS)
@@ -267,8 +262,6 @@ struct MacContentView: View {
             CardListView()
         case .points:
             PointsView()
-        case .companionPasses:
-            CompanionPassView()
         case .recommendations:
             RecommendationsView()
         case .transferPartners:

@@ -56,6 +56,9 @@ struct UserCard: Identifiable, Codable, Hashable {
     /// User-provided reward categories (overrides catalog earning rates)
     var rewardCategoriesOverride: [UserRewardCategory]?
 
+    /// User-chosen card icon color (hex string, e.g. "7B2D8B" for purple)
+    var cardIconColor: String?
+
     /// Card status
     var cardStatus: CardStatus
 
@@ -80,7 +83,7 @@ struct UserCard: Identifiable, Codable, Hashable {
         case ckRecordID, lastModified, sortOrder, dateAdded
         case issuerOverride, productNameOverride, networkOverride
         case annualFeeOverride, foreignTransactionFeeOverride
-        case signupBonusOverride, rewardCategoriesOverride, cardStatus
+        case signupBonusOverride, rewardCategoriesOverride, cardIconColor, cardStatus
         case currentBalance, lastStatementDate, lastStatementFileName
     }
 
@@ -120,6 +123,7 @@ struct UserCard: Identifiable, Codable, Hashable {
         foreignTransactionFeeOverride = try container.decodeIfPresent(Double.self, forKey: .foreignTransactionFeeOverride)
         signupBonusOverride = try container.decodeIfPresent(SignupBonusOverride.self, forKey: .signupBonusOverride)
         rewardCategoriesOverride = try container.decodeIfPresent([UserRewardCategory].self, forKey: .rewardCategoriesOverride)
+        cardIconColor = try container.decodeIfPresent(String.self, forKey: .cardIconColor)
 
         // Card status - derive from isActive/closedDate if not present
         if let status = try container.decodeIfPresent(CardStatus.self, forKey: .cardStatus) {
@@ -166,6 +170,7 @@ struct UserCard: Identifiable, Codable, Hashable {
         foreignTransactionFeeOverride: Double? = nil,
         signupBonusOverride: SignupBonusOverride? = nil,
         rewardCategoriesOverride: [UserRewardCategory]? = nil,
+        cardIconColor: String? = nil,
         cardStatus: CardStatus = .active,
         currentBalance: Double? = nil,
         lastStatementDate: Date? = nil,
@@ -198,6 +203,7 @@ struct UserCard: Identifiable, Codable, Hashable {
         self.foreignTransactionFeeOverride = foreignTransactionFeeOverride
         self.signupBonusOverride = signupBonusOverride
         self.rewardCategoriesOverride = rewardCategoriesOverride
+        self.cardIconColor = cardIconColor
         self.cardStatus = cardStatus
         self.currentBalance = currentBalance
         self.lastStatementDate = lastStatementDate

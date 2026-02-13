@@ -16,13 +16,12 @@ struct CategoryCard: Identifiable {
     let cardName: String
     let issuer: String
     let multiplier: Double
+    let nickname: String?       // User-assigned nickname
+    let cardIconColor: String?  // User-chosen icon hex color
 
+    /// Display name: prefer nickname, then full card name
     var displayName: String {
-        // Shorten card names for widget display
-        cardName
-            .replacingOccurrences(of: "Preferred", with: "Pref")
-            .replacingOccurrences(of: "Reserve", with: "Res")
-            .replacingOccurrences(of: "Business", with: "Biz")
+        nickname ?? cardName
     }
 }
 
@@ -131,12 +130,15 @@ struct CardProvider: TimelineProvider {
                 .first
 
             if let (card, multiplier) = bestCard, multiplier > 1.0 {
+                let userCard = userCardsByCardId[card.id]
                 categoryCards.append(CategoryCard(
                     id: "\(category.rawValue)-\(card.id)",
                     category: category,
                     cardName: card.name,
                     issuer: card.issuer.displayName,
-                    multiplier: multiplier
+                    multiplier: multiplier,
+                    nickname: userCard?.nickname,
+                    cardIconColor: userCard?.cardIconColor
                 ))
             }
         }

@@ -53,27 +53,49 @@ struct RecommendationsView: View {
 
             VStack(spacing: 0) {
                 ForEach(categoryGaps, id: \.category) { gap in
-                    HStack {
-                        Image(systemName: gap.category.icon)
-                            .font(.system(size: 18))
-                            .foregroundStyle(.orange)
-                            .frame(width: 28)
+                    VStack(alignment: .leading, spacing: 4) {
+                        HStack {
+                            Image(systemName: gap.category.icon)
+                                .font(.system(size: 18))
+                                .foregroundStyle(.orange)
+                                .frame(width: 28)
 
-                        VStack(alignment: .leading, spacing: 4) {
-                            Text(gap.category.displayName)
-                                .font(.system(size: 15, weight: .medium))
-                            Text("Current best: \(gap.currentRate)")
-                                .font(.system(size: 13))
-                                .foregroundStyle(.secondary)
+                            VStack(alignment: .leading, spacing: 2) {
+                                Text(gap.category.displayName)
+                                    .font(.system(size: 15, weight: .medium))
+                                Text("Your best: \(gap.currentRate)")
+                                    .font(.system(size: 12))
+                                    .foregroundStyle(.secondary)
+                            }
+
+                            Spacer()
+
+                            Text(gap.potentialRate)
+                                .font(.system(size: 16, weight: .bold, design: .rounded))
+                                .foregroundStyle(.green)
                         }
 
-                        Spacer()
-
-                        Text("Could earn \(gap.potentialRate)")
-                            .font(.system(size: 13, weight: .semibold))
-                            .foregroundStyle(.green)
+                        // Show which card would earn this rate
+                        HStack(spacing: 4) {
+                            Image(systemName: "arrow.right")
+                                .font(.system(size: 10))
+                                .foregroundStyle(.blue)
+                            Text("\(gap.potentialCardIssuer) \(gap.potentialCardName)")
+                                .font(.system(size: 12, weight: .medium))
+                                .foregroundStyle(.blue)
+                            if gap.potentialCardFee > 0 {
+                                Text("(\(gap.potentialCardFee.currencyFormatted)/yr)")
+                                    .font(.system(size: 11))
+                                    .foregroundStyle(.secondary)
+                            } else {
+                                Text("(No AF)")
+                                    .font(.system(size: 11))
+                                    .foregroundStyle(.green)
+                            }
+                        }
+                        .padding(.leading, 36)
                     }
-                    .frame(minHeight: 52)
+                    .frame(minHeight: 56)
                     .padding(.horizontal, 16)
                     .padding(.vertical, 8)
 
@@ -142,26 +164,35 @@ struct RecommendationsView: View {
         return "Great earning rates"
     }
 
-    private var categoryGaps: [(category: SpendCategory, currentRate: String, potentialRate: String)] {
+    private var categoryGaps: [(category: SpendCategory, currentRate: String, potentialRate: String, potentialCardName: String, potentialCardIssuer: String, potentialCardFee: Int)] {
         let userCardIds = Set(cardViewModel.userCards.map { $0.cardId })
         let userCards = feedService.cards.filter { userCardIds.contains($0.id) }
 
-        var gaps: [(SpendCategory, String, String)] = []
+        var gaps: [(SpendCategory, String, String, String, String, Int)] = []
 
-        for category in [SpendCategory.dining, .groceries, .gas, .travel] {
+        for category in [SpendCategory.dining, .groceries, .gas, .travel, .streaming, .online] {
             let currentBest = userCards.compactMap { card in
                 card.earningRates.first { $0.category == category }?.multiplier
             }.max() ?? 1.0
 
-            let potentialBest = feedService.cards.compactMap { card in
-                card.earningRates.first { $0.category == category }?.multiplier
-            }.max() ?? 1.0
+            // Find the actual best card in the full catalog
+            let potentialBestCard = feedService.cards
+                .filter { !userCardIds.contains($0.id) }
+                .compactMap { card -> (CreditCard, Double)? in
+                    guard let rate = card.earningRates.first(where: { $0.category == category }) else { return nil }
+                    return (card, rate.multiplier)
+                }
+                .sorted { $0.1 > $1.1 }
+                .first
 
-            if potentialBest > currentBest {
+            if let (bestCard, bestRate) = potentialBestCard, bestRate > currentBest {
                 gaps.append((
                     category,
                     currentBest.multiplierFormatted,
-                    potentialBest.multiplierFormatted
+                    bestRate.multiplierFormatted,
+                    bestCard.name,
+                    bestCard.issuer.displayName,
+                    bestCard.annualFee
                 ))
             }
         }

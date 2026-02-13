@@ -80,12 +80,12 @@ struct SmallCategoryRow: View {
 
             // Card with mini icon
             HStack(spacing: 4) {
-                WidgetMiniCard(issuer: item.issuer, size: 20)
+                WidgetMiniCard(issuer: item.issuer, customColor: item.cardIconColor, size: 20)
 
-                Text(item.cardShortName)
+                Text(item.displayName)
                     .font(.system(size: 11, weight: .medium))
                     .lineLimit(1)
-                    .minimumScaleFactor(0.8)
+                    .minimumScaleFactor(0.7)
 
                 Spacer()
 
@@ -103,14 +103,15 @@ struct MediumWidgetView: View {
     let entry: CardEntry
 
     var body: some View {
-        VStack(alignment: .leading, spacing: 4) {
+        VStack(alignment: .leading, spacing: 2) {
             // Header
-            HStack {
+            HStack(spacing: 4) {
                 Image(systemName: "creditcard.fill")
-                    .font(.system(size: 13))
+                    .font(.system(size: 11))
                     .foregroundStyle(.blue)
-                Text("Best Cards")
-                    .font(.system(size: 13, weight: .semibold))
+                Text("Which card should I use?")
+                    .font(.system(size: 11, weight: .semibold))
+                    .foregroundStyle(.secondary)
                 Spacer()
             }
 
@@ -120,16 +121,16 @@ struct MediumWidgetView: View {
                     .foregroundStyle(.secondary)
                     .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .center)
             } else {
-                VStack(spacing: 3) {
+                VStack(spacing: 0) {
                     ForEach(entry.categoryCards.prefix(5)) { item in
                         MediumCategoryRow(item: item)
                     }
                 }
-                Spacer(minLength: 0)
             }
         }
-        .padding(.horizontal, 12)
-        .padding(.vertical, 8)
+        .padding(.horizontal, 14)
+        .padding(.top, 10)
+        .padding(.bottom, 6)
         .containerBackground(.fill.tertiary, for: .widget)
     }
 }
@@ -138,7 +139,7 @@ struct MediumCategoryRow: View {
     let item: CategoryCard
 
     var body: some View {
-        HStack(spacing: 8) {
+        HStack(spacing: 6) {
             // Category icon
             Image(systemName: item.category.icon)
                 .font(.system(size: 12))
@@ -151,22 +152,23 @@ struct MediumCategoryRow: View {
                 .foregroundStyle(.secondary)
                 .frame(width: 48, alignment: .leading)
 
-            // Mini card icon
-            WidgetMiniCard(issuer: item.issuer, size: 22)
+            // Mini card icon - uses custom color if set
+            WidgetMiniCard(issuer: item.issuer, customColor: item.cardIconColor, size: 22)
 
-            // Full card name
-            Text(item.cardShortName)
+            // Card name - full nickname or card name
+            Text(item.displayName)
                 .font(.system(size: 13, weight: .medium))
                 .lineLimit(1)
-                .minimumScaleFactor(0.8)
+                .minimumScaleFactor(0.7)
 
-            Spacer()
+            Spacer(minLength: 4)
 
             // Multiplier
             Text(item.multiplier.multiplierString)
                 .font(.system(size: 14, weight: .bold, design: .rounded))
                 .foregroundStyle(item.multiplier >= 3 ? .blue : .primary)
         }
+        .frame(height: 24)
     }
 }
 
@@ -243,12 +245,12 @@ struct LargeCategoryRow: View {
                 .foregroundStyle(.secondary)
                 .frame(width: 60, alignment: .leading)
 
-            WidgetMiniCard(issuer: item.issuer, size: 20)
+            WidgetMiniCard(issuer: item.issuer, customColor: item.cardIconColor, size: 20)
 
-            Text(item.cardShortName)
+            Text(item.displayName)
                 .font(.system(size: 11))
                 .lineLimit(1)
-                .minimumScaleFactor(0.8)
+                .minimumScaleFactor(0.7)
 
             Spacer()
 
@@ -316,14 +318,14 @@ struct RectangularWidgetView: View {
     var body: some View {
         if let first = entry.categoryCards.first {
             HStack(spacing: 6) {
-                WidgetMiniCard(issuer: first.issuer, size: 20)
+                WidgetMiniCard(issuer: first.issuer, customColor: first.cardIconColor, size: 20)
 
                 VStack(alignment: .leading, spacing: 1) {
                     Text(first.category.displayName)
                         .font(.system(size: 10))
                         .foregroundStyle(.secondary)
                     HStack(spacing: 4) {
-                        Text(first.cardShortName)
+                        Text(first.displayName)
                             .font(.system(size: 12, weight: .medium))
                         Text(first.multiplier.multiplierString)
                             .font(.system(size: 12, weight: .bold))
@@ -345,9 +347,17 @@ struct RectangularWidgetView: View {
 
 struct WidgetMiniCard: View {
     let issuer: String
+    var customColor: String? = nil  // User-chosen hex color override
     var size: CGFloat = 24
 
     private var gradient: LinearGradient {
+        // Use custom color if provided
+        if let hex = customColor, !hex.isEmpty {
+            let baseColor = Color(hex: hex)
+            let darkerColor = Color(hex: hex).opacity(0.7)
+            return LinearGradient(colors: [baseColor, darkerColor], startPoint: .topLeading, endPoint: .bottomTrailing)
+        }
+
         let colors: [Color]
         let issuerLower = issuer.lowercased()
 
@@ -411,16 +421,7 @@ extension SpendCategory {
     }
 }
 
-extension CategoryCard {
-    var cardShortName: String {
-        displayName
-            .replacingOccurrences(of: "Preferred", with: "Pref")
-            .replacingOccurrences(of: "Reserve", with: "Res")
-            .replacingOccurrences(of: "Business", with: "Biz")
-            .replacingOccurrences(of: "Unlimited", with: "Unltd")
-            .replacingOccurrences(of: "American Express", with: "Amex")
-    }
-}
+// cardShortName removed - widget now shows full nickname or card name via displayName
 
 // Color extension for widget
 extension Color {

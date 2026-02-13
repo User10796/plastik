@@ -178,59 +178,101 @@ struct DashboardView: View {
 
     @ViewBuilder
     private var transferPartnersSection: some View {
-        NavigationLink {
-            TransferPartnerMapView()
-        } label: {
-            VStack(alignment: .leading, spacing: 12) {
-                HStack {
-                    Text("Transfer Partners")
-                        .font(.system(size: 17, weight: .semibold))
-                        .foregroundStyle(.primary)
-                    Spacer()
-                    Text("Your \(totalPointsFormatted) points unlock:")
-                        .font(.system(size: 13))
-                        .foregroundStyle(.secondary)
-                    Image(systemName: "chevron.right")
-                        .font(.system(size: 12, weight: .semibold))
-                        .foregroundStyle(.tertiary)
-                }
-
-                HStack {
-                    Text("\(airlinePartners) Airlines")
-                        .font(.system(size: 15, weight: .semibold))
-                        .foregroundStyle(.green)
-                    Text("·")
-                        .foregroundStyle(.secondary)
-                    Text("\(hotelPartners) Hotels")
-                        .font(.system(size: 15, weight: .semibold))
-                        .foregroundStyle(.green)
-                }
-
-                LazyVGrid(columns: Array(repeating: GridItem(.flexible()), count: 3), spacing: 8) {
-                    ForEach(feedService.transferPartners.prefix(6)) { partner in
-                        Text(partner.name.prefix(3).uppercased())
-                            .font(.system(size: 12, weight: .bold))
-                            .foregroundStyle(.primary)
-                            .frame(maxWidth: .infinity)
-                            .frame(minHeight: 40)
-                            #if os(iOS)
-                            .background(Color(.tertiarySystemBackground))
-                            #else
-                            .background(Color(nsColor: .controlBackgroundColor))
-                            #endif
-                            .clipShape(RoundedRectangle(cornerRadius: 6))
+        VStack(alignment: .leading, spacing: 12) {
+            HStack {
+                Text("Transfer Partners")
+                    .font(.system(size: 17, weight: .semibold))
+                    .foregroundStyle(.primary)
+                Spacer()
+                NavigationLink {
+                    TransferPartnerMapView()
+                } label: {
+                    HStack(spacing: 4) {
+                        Text("View All")
+                            .font(.system(size: 14))
+                        Image(systemName: "chevron.right")
+                            .font(.system(size: 12))
                     }
                 }
             }
-            .padding(16)
-            #if os(iOS)
-            .background(Color(.secondarySystemBackground))
+
+            HStack {
+                Text("\(airlinePartners) Airlines")
+                    .font(.system(size: 15, weight: .semibold))
+                    .foregroundStyle(.green)
+                Text("·")
+                    .foregroundStyle(.secondary)
+                Text("\(hotelPartners) Hotels")
+                    .font(.system(size: 15, weight: .semibold))
+                    .foregroundStyle(.green)
+                Spacer()
+                Text("\(totalPointsFormatted) points")
+                    .font(.system(size: 13))
+                    .foregroundStyle(.secondary)
+            }
+
+            #if os(macOS)
+            // macOS: show full partner names, clickable to detail pages
+            LazyVGrid(columns: Array(repeating: GridItem(.flexible()), count: 3), spacing: 8) {
+                ForEach(feedService.transferPartners.prefix(6)) { partner in
+                    NavigationLink {
+                        TransferPartnerDetailView(partner: partner)
+                    } label: {
+                        HStack(spacing: 6) {
+                            Image(systemName: partner.type.icon)
+                                .font(.system(size: 11))
+                                .foregroundStyle(.blue)
+                            Text(partner.name)
+                                .font(.system(size: 12, weight: .medium))
+                                .foregroundStyle(.primary)
+                                .lineLimit(1)
+                            Spacer()
+                            Image(systemName: "chevron.right")
+                                .font(.system(size: 9))
+                                .foregroundStyle(.tertiary)
+                        }
+                        .padding(.horizontal, 10)
+                        .frame(minHeight: 40)
+                        .background(Color(nsColor: .controlBackgroundColor))
+                        .clipShape(RoundedRectangle(cornerRadius: 6))
+                    }
+                    .buttonStyle(.plain)
+                }
+            }
             #else
-            .background(Color(nsColor: .windowBackgroundColor))
+            // iOS: compact tiles
+            LazyVGrid(columns: Array(repeating: GridItem(.flexible()), count: 3), spacing: 8) {
+                ForEach(feedService.transferPartners.prefix(6)) { partner in
+                    NavigationLink {
+                        TransferPartnerDetailView(partner: partner)
+                    } label: {
+                        VStack(spacing: 2) {
+                            Image(systemName: partner.type.icon)
+                                .font(.system(size: 12))
+                                .foregroundStyle(.blue)
+                            Text(partner.name)
+                                .font(.system(size: 10, weight: .medium))
+                                .foregroundStyle(.primary)
+                                .lineLimit(1)
+                                .minimumScaleFactor(0.7)
+                        }
+                        .frame(maxWidth: .infinity)
+                        .frame(minHeight: 40)
+                        .background(Color(.tertiarySystemBackground))
+                        .clipShape(RoundedRectangle(cornerRadius: 6))
+                    }
+                    .buttonStyle(.plain)
+                }
+            }
             #endif
-            .clipShape(RoundedRectangle(cornerRadius: 12))
         }
-        .buttonStyle(.plain)
+        .padding(16)
+        #if os(iOS)
+        .background(Color(.secondarySystemBackground))
+        #else
+        .background(Color(nsColor: .windowBackgroundColor))
+        #endif
+        .clipShape(RoundedRectangle(cornerRadius: 12))
     }
 
     // MARK: - My Cards Section (Section 6: Interactive)
@@ -535,7 +577,7 @@ struct MiniCardView: View {
         .padding(8)
         .background(
             LinearGradient(
-                colors: card.map { dashboardCardGradient(for: $0.issuer, cardName: $0.name) } ?? [Color(hex: "6B7280"), Color(hex: "4B5563")],
+                colors: cardGradientColors,
                 startPoint: .topLeading,
                 endPoint: .bottomTrailing
             )
@@ -550,6 +592,14 @@ struct MiniCardView: View {
             }
         }
         #endif
+    }
+
+    private var cardGradientColors: [Color] {
+        // User's custom icon color takes priority
+        if let hex = userCard.cardIconColor, !hex.isEmpty {
+            return [Color(hex: hex), Color(hex: hex).opacity(0.7)]
+        }
+        return card.map { dashboardCardGradient(for: $0.issuer, cardName: $0.name) } ?? [Color(hex: "6B7280"), Color(hex: "4B5563")]
     }
 }
 

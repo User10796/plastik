@@ -15,6 +15,17 @@ struct AddCardView: View {
     @State private var openDate = Date()
     @State private var notes = ""
 
+    // Card icon color
+    @State private var cardIconColor = ""
+
+    // Preset card icon colors
+    private let presetColors: [(name: String, hex: String)] = [
+        ("Blue", "004879"), ("Navy", "1a1a2e"), ("Purple", "7B2D8B"),
+        ("Red", "CC2222"), ("Gold", "B4975A"), ("Silver", "A9A9A9"),
+        ("Green", "1B5E3C"), ("Teal", "008080"), ("Orange", "E35205"),
+        ("Black", "1a1a1a"), ("Rose", "C4536A"), ("Sky", "00AEEF"),
+    ]
+
     // Signup bonus tracking
     @State private var trackBonus = false
     @State private var bonusSpent = ""
@@ -199,6 +210,30 @@ struct AddCardView: View {
             TextField("Nickname (optional)", text: $nickname)
                 .textContentType(.nickname)
 
+            // Card icon color picker
+            VStack(alignment: .leading, spacing: 6) {
+                Text("Card Icon Color (optional)")
+                    .font(.caption)
+                    .foregroundStyle(.secondary)
+                LazyVGrid(columns: Array(repeating: GridItem(.flexible(), spacing: 6), count: 6), spacing: 6) {
+                    ForEach(presetColors, id: \.hex) { preset in
+                        Button {
+                            cardIconColor = cardIconColor == preset.hex ? "" : preset.hex
+                        } label: {
+                            RoundedRectangle(cornerRadius: 4)
+                                .fill(Color(hex: preset.hex))
+                                .frame(height: 24)
+                                .overlay(
+                                    RoundedRectangle(cornerRadius: 4)
+                                        .stroke(cardIconColor == preset.hex ? Color.blue : Color.clear, lineWidth: 2)
+                                )
+                        }
+                        .buttonStyle(.plain)
+                    }
+                }
+            }
+            .padding(.vertical, 4)
+
             TextField("Last 4 digits", text: $lastFour)
             #if os(iOS)
                 .keyboardType(.numberPad)
@@ -341,7 +376,8 @@ struct AddCardView: View {
             openDate: openDate,
             signupBonusProgress: bonusProgress,
             isActive: true,
-            notes: notes.isEmpty ? nil : notes
+            notes: notes.isEmpty ? nil : notes,
+            cardIconColor: cardIconColor.isEmpty ? nil : cardIconColor
         )
 
         viewModel.addCard(card)

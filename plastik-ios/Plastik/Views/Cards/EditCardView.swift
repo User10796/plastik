@@ -32,8 +32,28 @@ struct EditCardView: View {
     @State private var showAddCategory = false
     @State private var editingCategory: UserRewardCategory?
 
+    // Card icon color
+    @State private var cardIconColor: String = ""
+    @State private var showColorPicker = false
+
     // Report sheet
     @State private var showReportSheet = false
+
+    // Preset card icon colors
+    private let presetColors: [(name: String, hex: String)] = [
+        ("Blue", "004879"),
+        ("Navy", "1a1a2e"),
+        ("Purple", "7B2D8B"),
+        ("Red", "CC2222"),
+        ("Gold", "B4975A"),
+        ("Silver", "A9A9A9"),
+        ("Green", "1B5E3C"),
+        ("Teal", "008080"),
+        ("Orange", "E35205"),
+        ("Black", "1a1a1a"),
+        ("Rose", "C4536A"),
+        ("Sky", "00AEEF"),
+    ]
 
     init(userCard: Binding<UserCard>, catalogCard: CreditCard?) {
         self._userCard = userCard
@@ -44,6 +64,7 @@ struct EditCardView: View {
         NavigationStack {
             Form {
                 basicInfoSection
+                cardIconColorSection
                 feesSection
                 signupBonusSection
                 rewardCategoriesSection
@@ -101,6 +122,83 @@ struct EditCardView: View {
                 )
             }
         }
+    }
+
+    // MARK: - Card Icon Color Section
+
+    private var cardIconColorSection: some View {
+        Section {
+            VStack(alignment: .leading, spacing: 8) {
+                Text("Choose a color for the card icon throughout the app and widget.")
+                    .font(.caption)
+                    .foregroundStyle(.secondary)
+
+                // Color preview
+                HStack(spacing: 12) {
+                    RoundedRectangle(cornerRadius: 6)
+                        .fill(
+                            cardIconColor.isEmpty
+                                ? LinearGradient(colors: defaultGradientColors, startPoint: .topLeading, endPoint: .bottomTrailing)
+                                : LinearGradient(colors: [Color(hex: cardIconColor), Color(hex: cardIconColor).opacity(0.7)], startPoint: .topLeading, endPoint: .bottomTrailing)
+                        )
+                        .frame(width: 48, height: 30)
+                        .shadow(color: .black.opacity(0.15), radius: 2, x: 0, y: 1)
+
+                    Text(cardIconColor.isEmpty ? "Default (issuer color)" : "Custom")
+                        .font(.subheadline)
+                        .foregroundStyle(.secondary)
+
+                    Spacer()
+
+                    if !cardIconColor.isEmpty {
+                        Button("Reset") {
+                            cardIconColor = ""
+                        }
+                        .font(.caption)
+                    }
+                }
+
+                // Preset color grid
+                LazyVGrid(columns: Array(repeating: GridItem(.flexible(), spacing: 8), count: 6), spacing: 8) {
+                    ForEach(presetColors, id: \.hex) { preset in
+                        Button {
+                            cardIconColor = preset.hex
+                        } label: {
+                            VStack(spacing: 2) {
+                                RoundedRectangle(cornerRadius: 4)
+                                    .fill(Color(hex: preset.hex))
+                                    .frame(height: 28)
+                                    .overlay(
+                                        RoundedRectangle(cornerRadius: 4)
+                                            .stroke(cardIconColor == preset.hex ? Color.blue : Color.clear, lineWidth: 2)
+                                    )
+                                Text(preset.name)
+                                    .font(.system(size: 9))
+                                    .foregroundStyle(.secondary)
+                            }
+                        }
+                        .buttonStyle(.plain)
+                    }
+                }
+            }
+            .padding(.vertical, 4)
+        } header: {
+            Text("Card Icon Color")
+        }
+    }
+
+    private var defaultGradientColors: [Color] {
+        if let card = catalogCard {
+            // Simplified fallback - just use issuer color
+            switch card.issuer {
+            case .chase: return [Color(hex: "004879"), Color(hex: "1a6bb3")]
+            case .amex: return [Color(hex: "006FCF"), Color(hex: "00A1E4")]
+            case .capitalOne: return [Color(hex: "D03027"), Color(hex: "a02620")]
+            case .citi: return [Color(hex: "003B70"), Color(hex: "0066b2")]
+            default: return [Color(hex: "4a5568"), Color(hex: "2d3748")]
+            }
+        }
+        return [Color(hex: "4a5568"), Color(hex: "2d3748")]
     }
 
     // MARK: - Basic Info Section
@@ -477,6 +575,9 @@ struct EditCardView: View {
 
         // Reward categories
         rewardCategories = userCard.rewardCategoriesOverride ?? []
+
+        // Card icon color
+        cardIconColor = userCard.cardIconColor ?? ""
     }
 
     private func saveChanges() {
@@ -559,6 +660,9 @@ struct EditCardView: View {
         } else {
             userCard.rewardCategoriesOverride = nil
         }
+
+        // Card icon color
+        userCard.cardIconColor = cardIconColor.isEmpty ? nil : cardIconColor
 
         userCard.lastModified = Date()
         viewModel.updateCard(userCard)

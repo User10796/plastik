@@ -12,6 +12,7 @@ struct ChurnTrackerView: View {
 
     var body: some View {
         List {
+            churnExplanationSection
             chase524Section
             issuerEligibilitySection
             bonusEligibilitySection
@@ -32,6 +33,44 @@ struct ChurnTrackerView: View {
                 StrategyView()
             }
         }
+    }
+
+    // MARK: - Explanation Header
+
+    @ViewBuilder
+    private var churnExplanationSection: some View {
+        Section {
+            VStack(alignment: .leading, spacing: 8) {
+                Text("What is Churn Tracking?")
+                    .font(.system(size: 15, weight: .semibold))
+
+                Text("\"Churning\" means strategically opening credit cards to earn signup bonuses, then repeating the process over time. Card issuers have rules to limit this. This tracker helps you navigate those rules.")
+                    .font(.system(size: 13))
+                    .foregroundStyle(.secondary)
+
+                VStack(alignment: .leading, spacing: 4) {
+                    churnTermRow("5/24", "Chase rejects applicants who opened 5+ personal cards (any issuer) in 24 months.")
+                    churnTermRow("Bonus Cooldown", "Many issuers require 24-48 months between signup bonuses for the same card.")
+                    churnTermRow("Lifetime Language", "Some issuers only give a signup bonus once per lifetime per product.")
+                    churnTermRow("Velocity", "Opening too many cards too quickly can trigger issuer rejections.")
+                }
+            }
+            .padding(.vertical, 4)
+        }
+    }
+
+    @ViewBuilder
+    private func churnTermRow(_ term: String, _ definition: String) -> some View {
+        HStack(alignment: .top, spacing: 8) {
+            Text(term)
+                .font(.system(size: 12, weight: .bold))
+                .foregroundStyle(.blue)
+                .frame(width: 80, alignment: .leading)
+            Text(definition)
+                .font(.system(size: 12))
+                .foregroundStyle(.secondary)
+        }
+        .padding(.vertical, 2)
     }
 
     // MARK: - 5/24 Status Dashboard

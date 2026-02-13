@@ -6,6 +6,8 @@ struct CardDetailView: View {
     @Environment(DataFeedService.self) private var feedService
     @State private var userCard: UserCard
     @State private var showDeleteConfirmation = false
+    @State private var showCloseCardConfirmation = false
+    @State private var closeDate = Date()
     @State private var showEditSheet = false
 
     init(userCard: UserCard) {
@@ -795,21 +797,117 @@ struct CardDetailView: View {
     @ViewBuilder
     private var actionsSection: some View {
         Section {
-            Button(userCard.cardStatus == .active ? "Archive Card" : "Reactivate Card") {
-                if userCard.cardStatus == .active {
-                    userCard.cardStatus = .closed
-                    userCard.closedDate = Date()
-                } else {
+            if userCard.cardStatus == .active {
+                Button {
+                    closeDate = Date()
+                    showCloseCardConfirmation = true
+                } label: {
+                    Label("Close Card", systemImage: "xmark.circle")
+                        .foregroundStyle(.orange)
+                }
+            } else {
+                Button {
                     userCard.cardStatus = .active
                     userCard.closedDate = nil
+                    userCard.isActive = true
+                    viewModel.updateCard(userCard)
+                } label: {
+                    Label("Reactivate Card", systemImage: "arrow.uturn.backward")
                 }
-                userCard.isActive = userCard.cardStatus == .active
-                viewModel.updateCard(userCard)
             }
 
-            Button("Delete Card", role: .destructive) {
+            Button(role: .destructive) {
                 showDeleteConfirmation = true
+            } label: {
+                Label("Delete Card", systemImage: "trash")
             }
+        }
+        .sheet(isPresented: $showCloseCardConfirmation) {
+            closeCardConfirmationSheet
+        }
+    }
+
+    @ViewBuilder
+    private var closeCardConfirmationSheet: some View {
+        NavigationStack {
+            Form {
+                Section {
+                    VStack(alignment: .leading, spacing: 12) {
+                        HStack(spacing: 8) {
+                            Image(systemName: "exclamationmark.triangle.fill")
+                                .foregroundStyle(.orange)
+                                .font(.title3)
+                            Text("Close \"\(cardDisplayName)\"?")
+                                .font(.headline)
+                        }
+
+                        Text("Closing this card will:")
+                            .font(.subheadline)
+                            .foregroundStyle(.secondary)
+
+                        VStack(alignment: .leading, spacing: 6) {
+                            closeCardBullet("Remove it from your active card count")
+                            closeCardBullet("Remove it from \"Which Card Should I Use\" recommendations")
+                            closeCardBullet("Move it to the Closed Cards section")
+                            closeCardBullet("Record the close date for churn timing calculations")
+                            closeCardBullet("Track when you become eligible for a new signup bonus")
+                        }
+                    }
+                }
+
+                Section("Close Date") {
+                    DatePicker("Date Closed", selection: $closeDate, displayedComponents: .date)
+
+                    Text("Choose the actual date the card was closed. This is used for churn eligibility calculations (e.g., 48-month bonus cooldowns).")
+                        .font(.caption)
+                        .foregroundStyle(.secondary)
+                }
+
+                Section {
+                    Text("You can reactivate this card later if needed.")
+                        .font(.caption)
+                        .foregroundStyle(.secondary)
+                }
+            }
+            #if os(macOS)
+            .formStyle(.grouped)
+            .frame(minWidth: 450, minHeight: 400)
+            #endif
+            .navigationTitle("Close Card")
+            #if os(iOS)
+            .navigationBarTitleDisplayMode(.inline)
+            #endif
+            .toolbar {
+                ToolbarItem(placement: .cancellationAction) {
+                    Button("Cancel") {
+                        showCloseCardConfirmation = false
+                    }
+                }
+                ToolbarItem(placement: .confirmationAction) {
+                    Button("Close Card") {
+                        userCard.cardStatus = .closed
+                        userCard.closedDate = closeDate
+                        userCard.isActive = false
+                        viewModel.updateCard(userCard)
+                        showCloseCardConfirmation = false
+                    }
+                    .foregroundStyle(.orange)
+                    .fontWeight(.semibold)
+                }
+            }
+        }
+    }
+
+    @ViewBuilder
+    private func closeCardBullet(_ text: String) -> some View {
+        HStack(alignment: .top, spacing: 8) {
+            Image(systemName: "circle.fill")
+                .font(.system(size: 5))
+                .foregroundStyle(.secondary)
+                .padding(.top, 6)
+            Text(text)
+                .font(.subheadline)
+                .foregroundStyle(.secondary)
         }
     }
 

@@ -272,15 +272,19 @@ struct CardListView: View {
             Button {
                 showAddCard = true
             } label: {
-                Label("Add Card", systemImage: "plus")
-                    .font(.system(size: 15, weight: .medium))
+                HStack(spacing: 6) {
+                    Image(systemName: "plus")
+                        .font(.system(size: 14, weight: .bold))
+                    Text("Add Card")
+                        .font(.system(size: 15, weight: .semibold))
+                }
+                .foregroundColor(.white)
+                .padding(.horizontal, 16)
+                .padding(.vertical, 10)
+                .background(Color.blue)
+                .clipShape(RoundedRectangle(cornerRadius: 10))
             }
-            .buttonStyle(.borderedProminent)
-            #if os(iOS)
-            .controlSize(.large)
-            #else
-            .controlSize(.large)
-            #endif
+            .buttonStyle(.plain)
         }
         .padding(.vertical, 8)
     }
@@ -445,6 +449,10 @@ struct CardRow: View {
     }
 
     private var cardGradientColors: [Color] {
+        // Use user's custom icon color if set
+        if let hex = userCard.cardIconColor, !hex.isEmpty {
+            return [Color(hex: hex), Color(hex: hex).opacity(0.7)]
+        }
         guard let card = card else {
             // Custom card - neutral gray
             return [Color(hex: "6B7280"), Color(hex: "4B5563")]
