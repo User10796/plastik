@@ -81,19 +81,34 @@ struct CardProvider: TimelineProvider {
             cards = feed.cards
         }
 
-        // Load user cards from: 1) App Group, 2) Standard UserDefaults
-        if let shared = Constants.sharedDefaults,
-           let data = shared.data(forKey: "localUserCards"),
-           let decoded = try? JSONDecoder().decode([UserCard].self, from: data) {
-            userCards = decoded
-            let colorsSet = decoded.filter { $0.cardIconColor != nil }.count
-            print("Widget: Loaded \(decoded.count) cards from shared defaults (\(colorsSet) with custom colors)")
-        } else if let data = UserDefaults.standard.data(forKey: "localUserCards"),
-                  let decoded = try? JSONDecoder().decode([UserCard].self, from: data) {
-            userCards = decoded
-            print("Widget: Loaded \(decoded.count) cards from STANDARD defaults (shared unavailable)")
-        } else {
-            print("Widget: No user cards found in any defaults")
+        // Load user cards from: 1) Shared file, 2) App Group defaults, 3) Standard defaults
+        if let containerURL = Constants.appGroupContainerURL {
+            let fileURL = containerURL.appendingPathComponent("userCards.json")
+            if let data = try? Data(contentsOf: fileURL),
+               let decoded = try? JSONDecoder().decode([UserCard].self, from: data) {
+                userCards = decoded
+                let colorsSet = decoded.filter { $0.cardIconColor != nil }.count
+                print("Widget: Loaded \(decoded.count) cards from shared FILE (\(colorsSet) with custom colors)")
+            } else {
+                print("Widget: Shared file not found or unreadable at \(fileURL.path)")
+            }
+        }
+
+        // Fallback to UserDefaults if file didn't work
+        if userCards.isEmpty {
+            if let shared = Constants.sharedDefaults,
+               let data = shared.data(forKey: "localUserCards"),
+               let decoded = try? JSONDecoder().decode([UserCard].self, from: data) {
+                userCards = decoded
+                let colorsSet = decoded.filter { $0.cardIconColor != nil }.count
+                print("Widget: Loaded \(decoded.count) cards from shared DEFAULTS (\(colorsSet) with custom colors)")
+            } else if let data = UserDefaults.standard.data(forKey: "localUserCards"),
+                      let decoded = try? JSONDecoder().decode([UserCard].self, from: data) {
+                userCards = decoded
+                print("Widget: Loaded \(decoded.count) cards from STANDARD defaults (shared unavailable)")
+            } else {
+                print("Widget: No user cards found in any source")
+            }
         }
 
         // Filter to only user's active cards

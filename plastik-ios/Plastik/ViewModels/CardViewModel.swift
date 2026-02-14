@@ -315,6 +315,17 @@ class CardViewModel {
             print("CardViewModel: WARNING - sharedDefaults is nil, widget won't see updates")
         }
 
+        // Also write to a file in the shared container (more reliable than UserDefaults for widgets)
+        if let containerURL = Constants.appGroupContainerURL {
+            let fileURL = containerURL.appendingPathComponent("userCards.json")
+            do {
+                try data.write(to: fileURL, options: .atomic)
+                print("CardViewModel: Wrote \(data.count) bytes to shared file \(fileURL.lastPathComponent)")
+            } catch {
+                print("CardViewModel: Failed to write shared file: \(error)")
+            }
+        }
+
         // Trigger widget refresh
         WidgetCenter.shared.reloadAllTimelines()
         print("CardViewModel: Triggered widget timeline reload")
