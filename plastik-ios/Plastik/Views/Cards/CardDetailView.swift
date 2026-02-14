@@ -124,16 +124,13 @@ struct CardDetailView: View {
             }
         }
         .sheet(isPresented: $showEditSheet, onDismiss: {
-            // Refresh local state from viewModel after editing
-            // Try UUID match first, then fallback to cardId + openDate
-            if let updated = viewModel.userCards.first(where: { $0.id == userCard.id }) {
-                userCard = updated
-            } else if let updated = viewModel.userCards.first(where: { $0.cardId == userCard.cardId && $0.openDate == userCard.openDate }) {
-                userCard = updated
-            }
-            // If neither found, keep the binding-updated local state (which has the edits)
+            refreshFromViewModel()
         }) {
             EditCardView(userCard: $userCard, catalogCard: card)
+                .id(userCard.id) // Force fresh sheet per card
+        }
+        .onChange(of: viewModel.userCards) { _, _ in
+            refreshFromViewModel()
         }
         .confirmationDialog(
             "Delete \"\(cardDisplayName)\"?",
@@ -154,6 +151,15 @@ struct CardDetailView: View {
 
     private var cardDisplayName: String {
         userCard.nickname ?? card?.name ?? "this card"
+    }
+
+    /// Refresh local @State userCard from viewModel's canonical copy
+    private func refreshFromViewModel() {
+        if let updated = viewModel.userCards.first(where: { $0.id == userCard.id }) {
+            userCard = updated
+        } else if let updated = viewModel.userCards.first(where: { $0.cardId == userCard.cardId && $0.openDate == userCard.openDate }) {
+            userCard = updated
+        }
     }
 
     // MARK: - Sections

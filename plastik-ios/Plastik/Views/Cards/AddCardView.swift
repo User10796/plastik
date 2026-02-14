@@ -18,12 +18,16 @@ struct AddCardView: View {
     // Card icon color
     @State private var cardIconColor = ""
 
-    // Preset card icon colors
+    // Preset card icon colors - common credit card colors
     private let presetColors: [(name: String, hex: String)] = [
-        ("Blue", "004879"), ("Navy", "1a1a2e"), ("Purple", "7B2D8B"),
-        ("Red", "CC2222"), ("Gold", "B4975A"), ("Silver", "A9A9A9"),
-        ("Green", "1B5E3C"), ("Teal", "008080"), ("Orange", "E35205"),
-        ("Black", "1a1a1a"), ("Rose", "C4536A"), ("Sky", "00AEEF"),
+        ("Chase Blue", "004879"), ("Citi Blue", "003B70"), ("Sky", "00AEEF"),
+        ("Navy", "1a1a2e"), ("Royal", "1a3d7c"), ("Cobalt", "0047AB"),
+        ("Gold", "B4975A"), ("Rose Gold", "B76E79"), ("Platinum", "C0C0C0"),
+        ("Silver", "A9A9A9"), ("Graphite", "4B4B4B"), ("Black", "1a1a1a"),
+        ("Emerald", "1B5E3C"), ("Sage", "7C9A6E"), ("Teal", "008080"),
+        ("Mint", "3EB489"), ("Forest", "003B2A"), ("Olive", "5C6B30"),
+        ("Red", "CC2222"), ("Burgundy", "800020"), ("Rose", "C4536A"),
+        ("Purple", "7B2D8B"), ("Plum", "5C2D82"), ("Orange", "E35205"),
     ]
 
     // Signup bonus tracking
