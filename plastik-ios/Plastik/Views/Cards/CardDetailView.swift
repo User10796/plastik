@@ -130,7 +130,11 @@ struct CardDetailView: View {
                 .id(userCard.id) // Force fresh sheet per card
         }
         .onChange(of: viewModel.userCards) { _, _ in
-            refreshFromViewModel()
+            // Only refresh when edit sheet is NOT open to avoid
+            // overwriting the binding mid-save (race condition)
+            if !showEditSheet {
+                refreshFromViewModel()
+            }
         }
         .confirmationDialog(
             "Delete \"\(cardDisplayName)\"?",
