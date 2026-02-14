@@ -1,8 +1,13 @@
 import Foundation
 
 struct UserCard: Identifiable, Codable, Hashable {
-    static func == (lhs: UserCard, rhs: UserCard) -> Bool { lhs.id == rhs.id }
-    func hash(into hasher: inout Hasher) { hasher.combine(id) }
+    static func == (lhs: UserCard, rhs: UserCard) -> Bool {
+        lhs.id == rhs.id && lhs.lastModified == rhs.lastModified
+    }
+    func hash(into hasher: inout Hasher) {
+        hasher.combine(id)
+        hasher.combine(lastModified)
+    }
 
     let id: UUID
     let cardId: String
