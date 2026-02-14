@@ -53,7 +53,19 @@ struct CardDetailView: View {
         userCard.productNameOverride != nil ||
         userCard.networkOverride != nil ||
         userCard.signupBonusOverride != nil ||
-        userCard.rewardCategoriesOverride != nil
+        userCard.rewardCategoriesOverride != nil ||
+        userCard.cardIconColor != nil
+    }
+
+    /// Card header gradient colors - uses custom icon color if set
+    private var headerGradientColors: [Color] {
+        if let hex = userCard.cardIconColor, !hex.isEmpty {
+            return [Color(hex: hex), Color(hex: hex).opacity(0.7)]
+        }
+        if let card = card {
+            return [issuerGradientStart(card.issuer), issuerGradientEnd(card.issuer)]
+        }
+        return [Color(hex: "4a5568"), Color(hex: "2d3748")]
     }
 
     var body: some View {
@@ -154,7 +166,7 @@ struct CardDetailView: View {
                 RoundedRectangle(cornerRadius: 12)
                     .fill(
                         LinearGradient(
-                            colors: [issuerGradientStart(card.issuer), issuerGradientEnd(card.issuer)],
+                            colors: headerGradientColors,
                             startPoint: .topLeading,
                             endPoint: .bottomTrailing
                         )
@@ -185,12 +197,15 @@ struct CardDetailView: View {
                         .padding()
                     }
                     .overlay(alignment: .topTrailing) {
-                        if hasUserOverrides {
+                        Button {
+                            showEditSheet = true
+                        } label: {
                             Image(systemName: "pencil.circle.fill")
                                 .font(.title3)
                                 .foregroundStyle(.white)
                                 .padding(8)
                         }
+                        .buttonStyle(.plain)
                     }
 
                 HStack {
