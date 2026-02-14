@@ -155,10 +155,15 @@ struct CardDetailView: View {
 
     /// Refresh local @State userCard from viewModel's canonical copy
     private func refreshFromViewModel() {
+        let oldColor = userCard.cardIconColor
         if let updated = viewModel.userCards.first(where: { $0.id == userCard.id }) {
             userCard = updated
+            print("CardDetailView.refresh: \(userCard.cardId) by UUID, color: \(oldColor ?? "nil") -> \(updated.cardIconColor ?? "nil")")
         } else if let updated = viewModel.userCards.first(where: { $0.cardId == userCard.cardId && $0.openDate == userCard.openDate }) {
             userCard = updated
+            print("CardDetailView.refresh: \(userCard.cardId) by cardId+date fallback, color: \(oldColor ?? "nil") -> \(updated.cardIconColor ?? "nil")")
+        } else {
+            print("CardDetailView.refresh: \(userCard.cardId) NOT FOUND in viewModel (id=\(userCard.id))")
         }
     }
 

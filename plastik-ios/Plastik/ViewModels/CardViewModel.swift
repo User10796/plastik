@@ -203,17 +203,24 @@ class CardViewModel {
         var updated = card
         updated.lastModified = Date()
 
+        print("CardViewModel.updateCard: \(card.cardId) id=\(card.id) color=\(card.cardIconColor ?? "nil")")
+        print("CardViewModel.updateCard: array has \(userCards.count) cards, IDs: \(userCards.map { "\($0.cardId)(\($0.id.uuidString.prefix(8)))" }.joined(separator: ", "))")
+
         if let index = userCards.firstIndex(where: { $0.id == card.id }) {
             // Found by UUID - update in place
+            let oldColor = userCards[index].cardIconColor
             userCards[index] = updated
-            print("CardViewModel: Updated card \(card.cardId) by UUID")
+            print("CardViewModel: Updated \(card.cardId) by UUID at index \(index), color: \(oldColor ?? "nil") -> \(updated.cardIconColor ?? "nil")")
         } else if let index = userCards.firstIndex(where: { $0.cardId == card.cardId && $0.openDate == card.openDate }) {
             // Fallback: find by cardId + openDate (handles UUID mismatches)
+            let oldId = userCards[index].id
             userCards[index] = updated
-            print("CardViewModel: Updated card \(card.cardId) by cardId+openDate fallback")
+            print("CardViewModel: Updated \(card.cardId) by cardId+openDate fallback at index \(index) (UUID mismatch: had \(oldId), got \(card.id))")
         } else {
             // Card not found - this shouldn't happen but log it
-            print("CardViewModel: WARNING - Card \(card.cardId) not found in array, cannot update")
+            print("CardViewModel: WARNING - Card \(card.cardId) NOT FOUND in array, cannot update!")
+            print("CardViewModel: Looking for id=\(card.id), cardId=\(card.cardId), openDate=\(card.openDate)")
+            print("CardViewModel: Array cardIds: \(userCards.map(\.cardId))")
             return
         }
 

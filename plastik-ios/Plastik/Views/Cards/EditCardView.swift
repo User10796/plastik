@@ -594,6 +594,7 @@ struct EditCardView: View {
 
         // Card icon color
         cardIconColor = userCard.cardIconColor ?? ""
+        print("EditCardView.loadCurrentValues: \(userCard.cardId) id=\(userCard.id), cardIconColor=\(userCard.cardIconColor ?? "nil") -> @State='\(cardIconColor)'")
     }
 
     private func saveChanges() {
@@ -678,9 +679,12 @@ struct EditCardView: View {
         }
 
         // Card icon color
+        let colorBefore = userCard.cardIconColor
         userCard.cardIconColor = cardIconColor.isEmpty ? nil : cardIconColor
+        print("EditCardView.saveChanges: \(userCard.cardId) color: \(colorBefore ?? "nil") -> \(userCard.cardIconColor ?? "nil"), @State cardIconColor='\(cardIconColor)'")
 
         userCard.lastModified = Date()
+        print("EditCardView.saveChanges: calling updateCard for \(userCard.cardId), id=\(userCard.id)")
         viewModel.updateCard(userCard)
     }
 }
