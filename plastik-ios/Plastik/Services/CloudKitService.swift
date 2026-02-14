@@ -471,6 +471,9 @@ class CloudKitService {
             record["rewardCategoriesOverrideJSON"] = nil
         }
 
+        // Card icon color
+        record["cardIconColor"] = card.cardIconColor as CKRecordValue?
+
         // Card status
         record["cardStatus"] = card.cardStatus.rawValue as CKRecordValue
 
@@ -591,6 +594,7 @@ class CloudKitService {
             foreignTransactionFeeOverride: record["foreignTransactionFeeOverride"] as? Double,
             signupBonusOverride: signupBonusOverride,
             rewardCategoriesOverride: rewardCategoriesOverride,
+            cardIconColor: record["cardIconColor"] as? String,
             cardStatus: cardStatus,
             currentBalance: record["currentBalance"] as? Double,
             lastStatementDate: record["lastStatementDate"] as? Date,

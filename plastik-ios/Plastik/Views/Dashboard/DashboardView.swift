@@ -521,9 +521,7 @@ struct MiniCardView: View {
 
     /// Determines if the card background is light (needs dark text)
     private var isLightBackground: Bool {
-        guard let card = card else { return false }
-        let gradientColors = dashboardCardGradient(for: card.issuer, cardName: card.name)
-        guard let firstColor = gradientColors.first else { return false }
+        guard let firstColor = cardGradientColors.first else { return false }
         return firstColor.isLight
     }
 

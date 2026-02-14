@@ -74,7 +74,7 @@ struct PointsView: View {
 
                             // Cards in this program
                             HStack(spacing: 8) {
-                                ForEach(program.cards, id: \.cardId) { userCard in
+                                ForEach(program.cards) { userCard in
                                     let card = feedService.card(for: userCard.cardId)
                                     Text(userCard.nickname ?? card?.name ?? "Card")
                                         .font(.system(size: 11))
