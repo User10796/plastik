@@ -290,14 +290,27 @@ class CardViewModel {
     // MARK: - Persistence
 
     private func saveToLocal() {
-        guard let data = try? JSONEncoder().encode(userCards) else { return }
+        guard let data = try? JSONEncoder().encode(userCards) else {
+            print("CardViewModel: Failed to encode userCards")
+            return
+        }
 
-        // Save to both standard and shared defaults for widget access
+        // Save to standard defaults
         UserDefaults.standard.set(data, forKey: localStorageKey)
-        sharedDefaults?.set(data, forKey: localStorageKey)
+        UserDefaults.standard.synchronize()
+
+        // Save to shared defaults for widget access
+        if let shared = sharedDefaults {
+            shared.set(data, forKey: localStorageKey)
+            shared.synchronize()
+            print("CardViewModel: Saved \(userCards.count) cards to shared defaults (\(data.count) bytes)")
+        } else {
+            print("CardViewModel: WARNING - sharedDefaults is nil, widget won't see updates")
+        }
 
         // Trigger widget refresh
         WidgetCenter.shared.reloadAllTimelines()
+        print("CardViewModel: Triggered widget timeline reload")
     }
 
     private func loadFromLocal() {

@@ -82,12 +82,18 @@ struct CardProvider: TimelineProvider {
         }
 
         // Load user cards from: 1) App Group, 2) Standard UserDefaults
-        if let data = Constants.sharedDefaults?.data(forKey: "localUserCards"),
+        if let shared = Constants.sharedDefaults,
+           let data = shared.data(forKey: "localUserCards"),
            let decoded = try? JSONDecoder().decode([UserCard].self, from: data) {
             userCards = decoded
+            let colorsSet = decoded.filter { $0.cardIconColor != nil }.count
+            print("Widget: Loaded \(decoded.count) cards from shared defaults (\(colorsSet) with custom colors)")
         } else if let data = UserDefaults.standard.data(forKey: "localUserCards"),
                   let decoded = try? JSONDecoder().decode([UserCard].self, from: data) {
             userCards = decoded
+            print("Widget: Loaded \(decoded.count) cards from STANDARD defaults (shared unavailable)")
+        } else {
+            print("Widget: No user cards found in any defaults")
         }
 
         // Filter to only user's active cards
@@ -154,6 +160,11 @@ struct CardProvider: TimelineProvider {
                 targetSpend: bonus.targetSpend,
                 daysRemaining: bonus.daysRemaining
             )
+        }
+
+        // Diagnostic: Log what widget is showing
+        for cc in categoryCards {
+            print("Widget entry: \(cc.category.displayName) -> \(cc.cardName), color: \(cc.cardIconColor ?? "default")")
         }
 
         return CardEntry(
