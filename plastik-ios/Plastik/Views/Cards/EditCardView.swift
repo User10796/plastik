@@ -598,68 +598,73 @@ struct EditCardView: View {
     }
 
     private func saveChanges() {
+        // Build a local copy to avoid @Binding flush timing issues.
+        // Writing individual properties to a @Binding doesn't guarantee
+        // the values are reflected when read back in the same scope.
+        var card = userCard
+
         // Basic info
-        userCard.nickname = nickname.isEmpty ? nil : nickname
-        userCard.lastFourDigits = lastFourDigits.isEmpty ? nil : lastFourDigits
-        userCard.openDate = openDate
-        userCard.cardStatus = cardStatus
-        userCard.notes = notes.isEmpty ? nil : notes
-        userCard.isActive = cardStatus == .active
+        card.nickname = nickname.isEmpty ? nil : nickname
+        card.lastFourDigits = lastFourDigits.isEmpty ? nil : lastFourDigits
+        card.openDate = openDate
+        card.cardStatus = cardStatus
+        card.notes = notes.isEmpty ? nil : notes
+        card.isActive = cardStatus == .active
 
         // Handle closed date based on status
-        if cardStatus == .closed && userCard.closedDate == nil {
-            userCard.closedDate = Date()
+        if cardStatus == .closed && card.closedDate == nil {
+            card.closedDate = Date()
         } else if cardStatus == .active {
-            userCard.closedDate = nil
+            card.closedDate = nil
         }
 
         // Overrides - only save if different from catalog
         if let catalog = catalogCard {
             // Issuer override
             if let selected = selectedIssuer, selected != catalog.issuer {
-                userCard.issuerOverride = selected.rawValue
+                card.issuerOverride = selected.rawValue
             } else {
-                userCard.issuerOverride = nil
+                card.issuerOverride = nil
             }
 
             // Product name override
             if productName != catalog.name && !productName.isEmpty {
-                userCard.productNameOverride = productName
+                card.productNameOverride = productName
             } else {
-                userCard.productNameOverride = nil
+                card.productNameOverride = nil
             }
 
             // Network override
             if selectedNetwork != catalog.network {
-                userCard.networkOverride = selectedNetwork.rawValue
+                card.networkOverride = selectedNetwork.rawValue
             } else {
-                userCard.networkOverride = nil
+                card.networkOverride = nil
             }
 
             // Annual fee override
             if let feeValue = Int(annualFee), feeValue != catalog.annualFee {
-                userCard.annualFeeOverride = feeValue
+                card.annualFeeOverride = feeValue
             } else {
-                userCard.annualFeeOverride = nil
+                card.annualFeeOverride = nil
             }
         } else {
             // No catalog card - save all values as overrides
-            userCard.issuerOverride = selectedIssuer?.rawValue
-            userCard.productNameOverride = productName.isEmpty ? nil : productName
-            userCard.networkOverride = selectedNetwork.rawValue
-            userCard.annualFeeOverride = Int(annualFee)
+            card.issuerOverride = selectedIssuer?.rawValue
+            card.productNameOverride = productName.isEmpty ? nil : productName
+            card.networkOverride = selectedNetwork.rawValue
+            card.annualFeeOverride = Int(annualFee)
         }
 
         // Foreign transaction fee (always override since catalog doesn't have this)
         if let feeValue = Double(foreignTransactionFee), feeValue >= 0 {
-            userCard.foreignTransactionFeeOverride = feeValue
+            card.foreignTransactionFeeOverride = feeValue
         } else {
-            userCard.foreignTransactionFeeOverride = nil
+            card.foreignTransactionFeeOverride = nil
         }
 
         // Signup bonus override
         if let amount = Int(bonusAmount), amount > 0 {
-            userCard.signupBonusOverride = SignupBonusOverride(
+            card.signupBonusOverride = SignupBonusOverride(
                 bonusAmount: amount,
                 bonusType: bonusType,
                 spendRequirement: Int(spendRequirement) ?? 0,
@@ -668,24 +673,26 @@ struct EditCardView: View {
                 bonusEarned: bonusEarned
             )
         } else {
-            userCard.signupBonusOverride = nil
+            card.signupBonusOverride = nil
         }
 
         // Reward categories
         if !rewardCategories.isEmpty {
-            userCard.rewardCategoriesOverride = rewardCategories
+            card.rewardCategoriesOverride = rewardCategories
         } else {
-            userCard.rewardCategoriesOverride = nil
+            card.rewardCategoriesOverride = nil
         }
 
         // Card icon color
-        let colorBefore = userCard.cardIconColor
-        userCard.cardIconColor = cardIconColor.isEmpty ? nil : cardIconColor
-        print("EditCardView.saveChanges: \(userCard.cardId) color: \(colorBefore ?? "nil") -> \(userCard.cardIconColor ?? "nil"), @State cardIconColor='\(cardIconColor)'")
+        card.cardIconColor = cardIconColor.isEmpty ? nil : cardIconColor
 
-        userCard.lastModified = Date()
-        print("EditCardView.saveChanges: calling updateCard for \(userCard.cardId), id=\(userCard.id)")
-        viewModel.updateCard(userCard)
+        card.lastModified = Date()
+
+        print("EditCardView.saveChanges: \(card.cardId) color=\(card.cardIconColor ?? "nil"), @State='\(cardIconColor)'")
+
+        // Write the complete card back to the binding and viewModel
+        userCard = card
+        viewModel.updateCard(card)
     }
 }
 
